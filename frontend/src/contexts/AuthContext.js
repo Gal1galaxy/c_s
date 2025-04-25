@@ -2,7 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 
 // 设置 axios 默认配置
-axios.defaults.baseURL = 'http://localhost:5000';  // 指向后端服务器
+axios.defaults.baseURL = '/api';  // 使用相对路径配合nginx转发,把/api/ 转发到 127.0.0.1:5000 后端（2025年4月25日）//指向后端服务器
 axios.defaults.withCredentials = true;  // 允许跨域请求携带cookie
 
 const AuthContext = createContext(null);

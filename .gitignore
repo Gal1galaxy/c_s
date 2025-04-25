@@ -1,69 +1,14 @@
-# 通用
-.DS_Store
-.env
-.env.*
-*.log
-*.pyc
-__pycache__/
-.idea/
-.vscode/
-*.swp
-*.swo
-.history/
-.tmp/
+Python（后端相关）
+backend/pycache/ backend/.py[cod] backend/.db backend/.env backend/env/ backend/venv/ backend/myvenv/ backend/.pytest_cache/ backend/htmlcov/ backend/instance/ backend/storage/uploads/ backend/storage/temp/ cloud_storage.db
 
-# 后端 Python
-backend/venv/
-backend/.env
-backend/instance/
-backend/uploads/
-backend/temp/
-backend/*.db
-backend/*.sqlite3
-backend/logs/
-backend/.pytest_cache/
-backend/.coverage
-backend/htmlcov/
-backend/dist/
-backend/build/
-backend/*.egg-info/
+Node.js（前端相关）
+frontend/node_modules/ frontend/.env frontend/.env.* frontend/dist/ frontend/build/ frontend/coverage/ frontend/.next/ frontend/.cache/ frontend/npm-debug.log* frontend/yarn-debug.log* frontend/yarn-error.log* frontend/.pnpm-debug.log*
 
-# 前端
-frontend/node_modules/
-frontend/.env
-frontend/.env.local
-frontend/.env.development.local
-frontend/.env.test.local
-frontend/.env.production.local
-frontend/build/
-frontend/dist/
-frontend/coverage/
-frontend/.next/
-frontend/out/
-frontend/.cache/
-frontend/npm-debug.log*
-frontend/yarn-debug.log*
-frontend/yarn-error.log*
-frontend/.pnpm-debug.log*
+操作系统文件
+.DS_Store Thumbs.db
 
-# IDE 配置文件
-.idea/
-.vscode/
-*.sublime-project
-*.sublime-workspace
+编辑器/IDE
+.vscode/ .idea/
 
-# 操作系统文件
-.DS_Store
-Thumbs.db
-*.swp
-*.swo
-*~
-
-# 其他
-*.bak
-*.tmp
-*.temp
-.env.local
-.env.development
-.env.test
-.env.production 
+临时文件
+*.log *.swp *.swo *.bak *.tmp *.temp .history/ .tmp/

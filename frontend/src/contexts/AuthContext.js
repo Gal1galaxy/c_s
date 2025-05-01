@@ -63,6 +63,7 @@ export const AuthProvider = ({ children }) => {
   //###################更改2025.5.1改成带Authorization:Bearer token请求###################
   // 检查认证状态
   useEffect(() => {
+    const checkAuth = async () => {
     const token = localStorage.getItem('token');
     if (token) {
       try{
@@ -81,6 +82,8 @@ export const AuthProvider = ({ children }) => {
     }
     setLoading(false);
   };
+    checkAuth();
+  },[]);
   //###################更改2025.5.1改成带Authorization:Bearer token请求###################
 /* ###################初始代码###################
   // 检查认证状态

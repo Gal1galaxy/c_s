@@ -82,8 +82,6 @@ export const AuthProvider = ({ children }) => {
     }
     setLoading(false);
   };
-    checkAuth();
-  },[]);
   //###################更改2025.5.1改成带Authorization:Bearer token请求###################
 /* ###################初始代码###################
   // 检查认证状态
@@ -106,7 +104,8 @@ export const AuthProvider = ({ children }) => {
 
     checkAuth();
   }, []);
-
+//#########################检查认证状态在这里结束#########################
+  
   const login = async (username, password) => {
     try {
       const response = await axios.post('/api/auth/login', {

@@ -48,6 +48,7 @@ export const AuthProvider = ({ children }) => {
           console.log('Unauthorized error - clearing auth state');
           localStorage.removeItem('token');
           setUser(null);
+          window.location.href = '/login';  // 2025.5.1<<== 新增,加强 response 拦截器,增加这行自动跳转到 /login
         }
         return Promise.reject(error);
       }

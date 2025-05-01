@@ -3,7 +3,8 @@ import axios from 'axios';
 
 // 设置 axios 默认配置
 axios.defaults.baseURL = '/api';  // 使用相对路径配合nginx转发,把/api/ 转发到 127.0.0.1:5000 后端（2025年4月25日）//指向后端服务器
-axios.defaults.withCredentials = true;  // 允许跨域请求携带cookie
+
+//axios.defaults.withCredentials = true;  // 2025.5.1注释掉：使用JWT，不用跨域的Cookie，避免 axios 在请求时乱带 cookie，导致 Flask 后端搞混认证// 允许跨域请求携带cookie
 
 const AuthContext = createContext(null);
 

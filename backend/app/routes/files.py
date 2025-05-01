@@ -79,7 +79,7 @@ def download_file(file_id):
         )
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-        '''2025.5.1更改文件下载逻辑（旧代码）
+        2025.5.1更改文件下载逻辑（旧代码）'''
          ####2025.5.1更改文件下载逻辑（新代码）#######
          # 获取解密后的临时文件路径
         temp_path = file_service.get_decrypted_file_path(file)

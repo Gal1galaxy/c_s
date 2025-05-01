@@ -22,6 +22,27 @@ const FileList = ({ files, onDelete, onShare }) => {
       setLoading(false);
     }
   };
+  ########新增2025.5.1新的文件下载逻辑########
+  ########更改下载按钮逻辑：用 axios 带上 token，后端返回 blob，再触发浏览器下载
+  const handleDownload = async (file) => {
+    try {
+      const response = await axios.get(`/api/files/download/${file.id}`, {
+        responseType: 'blob'  // 返回文件流
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', file.filename);  // 设置文件名
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      message.error('下载文件失败');
+    }
+  };
+ ######新增2025.5.1新的文件下载逻辑########
 
   const columns = [
     {

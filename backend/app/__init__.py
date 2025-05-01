@@ -101,7 +101,7 @@ def create_app(config_name='default'):
     app.cli.add_command(init_db_command)
 
     #返回错误代码
-    app.config['PROPAGATE_EXCEPTIONS'] = True //强制 Flask 遇到错误时，不吞掉，直接抛出
-    app.config['TRAP_HTTP_EXCEPTIONS'] = True //HTTP 错误（404、500），也抛出详细异常，不直接短路返回Response
+    app.config['PROPAGATE_EXCEPTIONS'] = True #强制 Flask 遇到错误时，不吞掉，直接抛出
+    app.config['TRAP_HTTP_EXCEPTIONS'] = True #HTTP 错误（404、500），也抛出详细异常，不直接短路返回Response
     
     return app 

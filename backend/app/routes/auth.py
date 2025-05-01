@@ -1,3 +1,4 @@
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import Blueprint, request, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db
@@ -96,7 +97,8 @@ def logout():
     return jsonify({'message': '退出成功'})
 
 @bp.route('/profile')
-@login_required
+#2025.5.1更改去掉@login_required改成下一行的JWT2025.5.1
+@jwt_required()  #JWT控制登录状态
 ###############2025.5.1更改获取用户信息逻辑，使用JWT token的信息解析出user_id再查询用户###############
 def get_profile():
     """获取用户信息"""

@@ -55,7 +55,20 @@ def download_file(file_id):
     """下载文件"""
     try:
         share_code = request.args.get('shareCode')
-        
+        user_id = None
+##############新增2025.5.1download_file方法,从token中解析user_id，不依赖current_user##############
+        #尝试提取 Authorization Bearer Token
+        auth_header = request.headers.get('Authorization')
+        if auth_header and auth_header.startswith('Bearer '):
+            token = auth_header.split(' ')[1]
+            from flask_jwt_extended import decode_token
+            try:
+                decoded_token = decode_token(token)
+                user_id = int(decoded_token['sub'])
+            except Exception as e:
+                print(f"Token decode error: {str(e)}")
+##############新增2025.5.1download_file方法,从token中解析user_id，不依赖current_user##############
+                
         if share_code:
             # 通过分享码访问
             share = share_service.get_share_by_code(share_code)
@@ -65,16 +78,18 @@ def download_file(file_id):
             if share.is_expired:
                 return jsonify({'error': '分享已过期'}), 403
         else:
-            #2025.5.1新增：在尝试访问current_user.id之前，检查用户是否已登录
-            if not hasattr(current_user, 'id') or current_user.is_anonymous:
+            ################2025.5.1新增：在尝试访问current_user.id之前，检查用户是否已登录################
+            # 没有分享码，需要已登录
+            if not user_id:
                 return jsonify({'error': '请先登录'}), 401
             # 直接访问需要验证权限
-            if not permission_service.can_read(current_user.id, file_id):
+            if not permission_service.can_read(user_id, file_id):
                 return jsonify({'error': '无权访问此文件'}), 403
+            ################2025.5.1新增：在尝试访问current_user.id之前，检查用户是否已登录################
         
         file = File.query.get_or_404(file_id)
         
-        '''2025.5.1更改文件下载逻辑（旧代码）
+        '''2025.5.1更改文件下载逻辑（初始代码）
         return send_file(
             file_service.get_decrypted_file_path(file),
             as_attachment=True,
@@ -82,9 +97,10 @@ def download_file(file_id):
         )
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-        2025.5.1更改文件下载逻辑（旧代码）'''
-         ####2025.5.1更改文件下载逻辑（新代码）#######
-         # 获取解密后的临时文件路径
+        2025.5.1更改文件下载逻辑（初始代码）'''
+        
+         #########新增2025.5.1更改文件下载逻辑#########
+         # 获取解密后的临时文件路径（发送文件）
         temp_path = file_service.get_decrypted_file_path(file)
 
         # 确保临时文件存在
@@ -100,7 +116,7 @@ def download_file(file_id):
     except Exception as e:
         print(f"Download file error: {str(e)}")  # 打印错误日志
         return jsonify({'error': str(e)}), 500
-         ####2025.5.1更改文件下载逻辑（新代码）#######    
+         #########新增2025.5.1更改文件下载逻辑#########    
         
 @bp.route('/list', methods=['GET'])
 @login_required

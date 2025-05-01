@@ -97,6 +97,30 @@ def logout():
 
 @bp.route('/profile')
 @login_required
+###############2025.5.1更改获取用户信息逻辑，使用JWT token的信息解析出user_id再查询用户###############
+def get_profile():
+    """获取用户信息"""
+    try:
+        user_id = get_jwt_identity()
+        if not user_id:
+            return jsonify({'error': '用户未登录'}), 401
+
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': '用户不存在'}), 404
+        return jsonify({
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'role': user.role
+            }
+        })
+    except Exception as e:
+        print(f"Get profile error: {str(e)}")
+        return jsonify({'error': '获取用户信息失败'}), 500
+###############2025.5.1更改获取用户信息逻辑，使用JWT token的信息解析出user_id再查询用户###############
+'''###############初始获取用户信息逻辑###############
 def get_profile():
     """获取用户信息"""
     try:
@@ -111,3 +135,4 @@ def get_profile():
     except Exception as e:
         print(f"Get profile error: {str(e)}")  # 调试日志
         return jsonify({'error': '获取用户信息失败'}), 500 
+        ###############初始获取用户信息逻辑###############'''

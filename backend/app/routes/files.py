@@ -65,6 +65,9 @@ def download_file(file_id):
             if share.is_expired:
                 return jsonify({'error': '分享已过期'}), 403
         else:
+            #2025.5.1新增：在尝试访问current_user.id之前，检查用户是否已登录
+            if not hasattr(current_user, 'id') or current_user.is_anonymous:
+                return jsonify({'error': '请先登录'}), 401
             # 直接访问需要验证权限
             if not permission_service.can_read(current_user.id, file_id):
                 return jsonify({'error': '无权访问此文件'}), 403

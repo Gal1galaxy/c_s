@@ -70,6 +70,8 @@ def download_file(file_id):
                 return jsonify({'error': '无权访问此文件'}), 403
         
         file = File.query.get_or_404(file_id)
+        
+        '''2025.5.1更改文件下载逻辑（旧代码）
         return send_file(
             file_service.get_decrypted_file_path(file),
             as_attachment=True,
@@ -77,7 +79,26 @@ def download_file(file_id):
         )
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+        '''2025.5.1更改文件下载逻辑（旧代码）
+         ####2025.5.1更改文件下载逻辑（新代码）#######
+         # 获取解密后的临时文件路径
+        temp_path = file_service.get_decrypted_file_path(file)
 
+        # 确保临时文件存在
+        if not os.path.exists(temp_path):
+            return jsonify({'error': '文件解密失败，找不到临时文件'}), 500
+
+        # 发送文件
+        return send_file(
+            temp_path,
+            as_attachment=True,
+            download_name=file.filename
+        )
+    except Exception as e:
+        print(f"Download file error: {str(e)}")  # 打印错误日志
+        return jsonify({'error': str(e)}), 500
+         ####2025.5.1更改文件下载逻辑（新代码）#######    
+        
 @bp.route('/list', methods=['GET'])
 @login_required
 def list_files():

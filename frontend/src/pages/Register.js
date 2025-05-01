@@ -14,7 +14,11 @@ const Register = () => {
       await axios.post('/api/auth/register', {
         username: values.username,
         email: values.email,
-        password: values.password
+        password: values.password   //2025.5.1加上空的 Authorization 头
+        }, {
+        headers: {
+          Authorization: ''
+        }                           //2025.5.1保证注册请求时不会错误地带旧的 Authorization header
       });
       message.success('注册成功，请登录');
       navigate('/login');

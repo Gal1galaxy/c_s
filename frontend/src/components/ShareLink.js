@@ -36,14 +36,41 @@ const ShareLink = ({ file, shareCode }) => {
             loading={loading}
           >
             预览
+      // #############新增2025.5.1新的axios发送下载请求逻辑############       
           </Button>
         )}
+          <Button
+            icon={<DownloadOutlined />} 
+            onClick={async () => {
+                 try {
+                   const response = await axios.get(`/api/files/download/${file.id}?shareCode=${shareCode}`, {
+                     responseType: 'blob'
+                   });
+                   const blob = new Blob([response.data]);
+                   const downloadUrl = window.URL.createObjectURL(blob);
+                   const a = document.createElement('a');
+                   a.href = downloadUrl;
+                   a.download = file.filename;
+                   document.body.appendChild(a);
+                   a.click();
+                   window.URL.revokeObjectURL(downloadUrl);
+                   document.body.removeChild(a);
+                 } catch (error) {
+                   console.error('Download error:', error);
+                 }
+                }}
+              >
+                下载
+             </Button>
+          // #############新增2025.5.1新的axios发送下载请求逻辑############
+          /* #############旧的window.open下载逻辑#############
         <Button 
           icon={<DownloadOutlined />} 
           onClick={() => window.open(`/api/files/download/${file.id}?shareCode=${shareCode}`)}
         >
           下载
         </Button>
+           #############旧的window.open下载逻辑#############  */
       </Space>
 
       <Modal

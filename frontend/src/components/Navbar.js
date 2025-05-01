@@ -21,6 +21,10 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
+    //##############新增2025.5.1在 logout() 后，彻底清理localStorage，并且跳转到/login，确保彻底登出。##############
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    //##############新增2025.5.1在 logout() 后，彻底清理localStorage，并且跳转到/login，确保彻底登出。##############
     navigate('/login');
   };
 

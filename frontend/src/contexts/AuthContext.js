@@ -59,7 +59,30 @@ export const AuthProvider = ({ children }) => {
       axios.interceptors.response.eject(responseInterceptor);
     };
   }, []);
-
+  
+  //###################更改2025.5.1改成带Authorization:Bearer token请求###################
+  // 检查认证状态
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try{
+        const response = await axios.get('/api/auth/profile', {
+          headers:{
+            Authorization: `Bearer ${token}`
+          }
+        });
+        setUser(response.data.user);
+      } catch(error) {
+        console.error('Auth check failed:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+      }
+    }
+    setLoading(false);
+  };
+  //###################更改2025.5.1改成带Authorization:Bearer token请求###################
+/* ###################初始代码###################
   // 检查认证状态
   useEffect(() => {
     const checkAuth = async () => {
@@ -76,6 +99,7 @@ export const AuthProvider = ({ children }) => {
       }
       setLoading(false);
     };
+    ###################初始代码###################*/
 
     checkAuth();
   }, []);

@@ -16,9 +16,16 @@ const Login = () => {
       console.log('Login attempt with:', values);  // 调试日志
       await login(values.username, values.password);
       message.success('登录成功');
+      //#############2025.5.1更改直接跳转到文件目录#############
+      // 重定向到之前的页面或首页
+      const from = location.state?.from?.pathname || '/files';
+      navigate('/files', { replace: true });
+      //#############2025.5.1更改直接跳转到文件目录#############
+      /*##########初始代码##########
       // 重定向到之前的页面或首页
       const from = location.state?.from?.pathname || '/files';
       navigate(from, { replace: true });
+      ##########初始代码##########*/
     } catch (error) {
       console.error('Login error:', error);  // 调试日志
       message.error(error.error || '登录失败');

@@ -17,6 +17,10 @@ def create_share():
         data = request.get_json()
         file_id = data.get('fileId')
         shared_with = data.get('sharedWith')  # 用户ID或null
+
+        if shared_with is not None:
+            shared_with = int(shared_with)   #增加2025.5.4强制转int
+            
         can_write = data.get('canWrite', False)
         expires_days = data.get('expiresDays')  # 过期天数
         

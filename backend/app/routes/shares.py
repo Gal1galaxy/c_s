@@ -55,7 +55,7 @@ def list_shares():
         return jsonify({
             'sharedFiles': [share_service.to_dict(share) for share in shared_files],
             'receivedShares': [share_service.to_dict(share) for share in received_shares]
-        }）
+        })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     ################################新增2025.5.4重构分享代码################################

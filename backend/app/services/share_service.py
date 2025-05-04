@@ -111,6 +111,9 @@ class ShareService:
 
     def to_dict(self, share):
         """将分享对象转换为字典"""
+        if not share or not share.file:   #增加2025.5.4 后端 to_dict() 加保险
+            return {}
+            
         return {
             'id': share.id,
             'file': {

@@ -1,3 +1,4 @@
+from flask_jwt_extended import jwt_required, get_jwt   #JWT token机制
 from flask import Blueprint, request, jsonify
 from flask_login import current_user
 from app import db
@@ -10,6 +11,18 @@ import os
 bp = Blueprint('admin', __name__, url_prefix='/api/admin')
 
 def admin_required(f):
+    ############################更改2025.5.4修改admin_required装饰器JWT############################
+    @wraps(f)
+    @jwt_required()
+    def decorated_function(*args, **kwargs):
+        claims = get_jwt()
+        if claims.get('role') != 'admin':
+            return jsonify({'error': '需要管理员权限'}), 403
+        return f(*args, **kwargs)
+    return decorated_function
+    ############################更改2025.5.4修改admin_required装饰器JWT############################
+    '''
+    ##################初始代码##################
     """检查是否是管理员的装饰器"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -17,6 +30,8 @@ def admin_required(f):
             return jsonify({'error': '需要管理员权限'}), 403
         return f(*args, **kwargs)
     return decorated_function
+    ##################初始代码##################
+    '''
 
 @bp.route('/users', methods=['GET'])
 @login_required

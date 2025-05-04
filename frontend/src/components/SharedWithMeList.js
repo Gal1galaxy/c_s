@@ -42,7 +42,10 @@ const SharedWithMeList = () => {
           actions={[
             <Button
               icon={<EyeOutlined />}
-              onClick={() => handlePreview(share.file.id)}
+              onClick={() => {       //更改2025.5.4，解决分享问题，做判空处理，保护 share.file。初始代码onClick={() => handlePreview(share.file.id)}
+                if (share?.file?.id) handlePreview(share.file.id);
+                else message.error('文件信息缺失，无法预览');
+            }}
             >
               预览
             </Button>,
@@ -56,7 +59,7 @@ const SharedWithMeList = () => {
         >
           <List.Item.Meta
             avatar={<FileOutlined style={{ fontSize: 24 }} />}
-            title={share.file.filename}
+            title={share?.file?.filename || '未知文件'}//更改2025.5.4做判空处理，保护 share.file..初始代码：title={share.file.filename}
             description={
               <Space direction="vertical">
                 <Space>

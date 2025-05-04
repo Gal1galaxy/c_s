@@ -3,7 +3,8 @@ from app.models.share import FileShare
 from app.models.file import File
 from datetime import datetime
 import secrets
-from sqlalchemy import or_  
+from sqlalchemy import or_, cast
+from sqlalchemy.types import String
 
 class ShareService:
     def create_share(self, file_id, shared_by, shared_with=None, can_write=False, expires_at=None):

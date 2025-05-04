@@ -3,6 +3,7 @@ from app.models.share import FileShare
 from app.models.file import File
 from datetime import datetime
 import secrets
+from sqlalchemy import or_  
 
 class ShareService:
     def create_share(self, file_id, shared_by, shared_with=None, can_write=False, expires_at=None):
@@ -56,7 +57,12 @@ class ShareService:
     def get_received_shares(self, user_id):
         ####################新增2025.5.4重构分享代码####################
         """获取别人分享给当前用户的分享"""
-        return FileShare.query.filter_by(shared_with=user_id).all()
+        return FileShare.query.filter(
+            or_(
+                FileShare.shared_with == user_id,
+                FileShare.shared_with == None
+            )
+        ).all()
         ####################新增2025.5.4重构分享代码####################
         
         '''

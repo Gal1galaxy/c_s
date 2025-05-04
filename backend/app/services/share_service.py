@@ -59,8 +59,8 @@ class ShareService:
         """获取别人分享给当前用户的分享"""
         return FileShare.query.filter(
             or_(
-                FileShare.shared_with == user_id,
-                FileShare.shared_with == None
+                cast(FileShare.shared_with, String) == str(user_id), #cast(FileShare.shared_with, String)把数据库字段强制转成字符串
+                FileShare.shared_with == None                        #str(user_id)把用户ID也转成字符串
             )
         ).all()
         ####################新增2025.5.4重构分享代码####################

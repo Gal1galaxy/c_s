@@ -34,7 +34,7 @@ def admin_required(f):
     '''
 
 @bp.route('/users', methods=['GET'])
-@login_required
+#2025.5.4去掉所有@login_required
 @admin_required
 def list_users():
     """获取所有用户列表"""
@@ -49,7 +49,7 @@ def list_users():
     })
 
 @bp.route('/users/<int:user_id>', methods=['PUT'])
-@login_required
+#@login_required
 @admin_required
 def update_user(user_id):
     """更新用户信息"""
@@ -73,7 +73,7 @@ def update_user(user_id):
     })
 
 @bp.route('/users/<int:user_id>', methods=['DELETE'])
-@login_required
+#@login_required
 @admin_required
 def delete_user(user_id):
     """删除用户"""
@@ -94,7 +94,7 @@ def delete_user(user_id):
     return jsonify({'message': '用户删除成功'})
 
 @bp.route('/stats', methods=['GET'])
-@login_required
+#@login_required
 @admin_required
 def get_stats():
     """获取系统统计信息"""

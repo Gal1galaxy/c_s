@@ -58,6 +58,12 @@ class ShareService:
         ####################新增2025.5.4重构分享代码####################
         """获取别人分享给当前用户或者公开分享的文件"""
         now = datetime.utcnow()
+        try:
+            user_id = int(user_id)  # 强制转换成整数，保证类型匹配
+        except Exception as e:
+            print(f"Invalid user_id: {user_id}, error: {e}")
+            return []
+            
         return FileShare.query.filter(
             or_(
                 FileShare.shared_with == user_id,  # 私发

@@ -36,7 +36,7 @@ def create_share():
         share = share_service.create_share(
             file_id=file_id,
             shared_by=get_jwt_identity(),#更改2025.5.4改成JWT验证shared_by=request.current_user.id,------>shared_by=get_jwt_identity(),
-            shared_with=shared_with,
+            shared_with=shared_with_id,
             can_write=can_write,
             expires_at=expires_at
         )

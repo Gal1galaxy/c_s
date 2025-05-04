@@ -58,13 +58,29 @@ class ShareService:
         """获取别人分享给当前用户的分享"""
         return FileShare.query.filter_by(shared_with=user_id).all()
         ####################新增2025.5.4重构分享代码####################
+        
         '''
         ##########初始代码 ##########
         """获取用户收到的所有分享"""
         return FileShare.query.filter_by(shared_with=user_id).all()
         ##########初始代码 ##########
         '''
-    
+        
+    ######################更改2025.5.4新的撤销分享函数######################
+    def revoke_share(self, share_id, user_id):
+        """撤销分享"""
+        share = FileShare.query.get(share_id)
+        if not share:
+            return False
+            
+        # 检查当前用户是不是分享发起人 或者 接受人
+        if share.shared_by == user_id or share.shared_with == user_id:
+            db.session.delete(share)
+            db.session.commit()
+            return True
+        return False
+    ######################更改2025.5.4新的撤销分享函数######################
+    '''######################初始代码######################
     def revoke_share(self, share_id, user_id):
         """撤销分享"""
         share = FileShare.query.get(share_id)
@@ -73,6 +89,7 @@ class ShareService:
             db.session.commit()
             return True
         return False
+    ######################初始代码######################'''
     
     def check_share_permission(self, share_code, user_id=None):
         """检查分享权限"""

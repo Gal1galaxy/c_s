@@ -72,6 +72,12 @@ class ShareService:
         share = FileShare.query.get(share_id)
         if not share:
             return False
+
+        try:
+            user_id = int(user_id) #强制转换成int进行对比
+        except Exception as e:
+            print(f"Invalid user_id: {user_id}, error: {e}")
+            return False
             
         # 检查当前用户是不是分享发起人 或者 接受人
         if share.shared_by == user_id or share.shared_with == user_id:
@@ -80,7 +86,7 @@ class ShareService:
             return True
         return False
     ######################更改2025.5.4新的撤销分享函数######################
-    '''######################初始代码######################
+    '''###################初始代码###################
     def revoke_share(self, share_id, user_id):
         """撤销分享"""
         share = FileShare.query.get(share_id)
@@ -89,7 +95,7 @@ class ShareService:
             db.session.commit()
             return True
         return False
-    ######################初始代码######################'''
+    ###################初始代码###################'''
     
     def check_share_permission(self, share_code, user_id=None):
         """检查分享权限"""

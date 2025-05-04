@@ -52,8 +52,8 @@ def list_shares():
     """获取用户的分享列表"""
     try:
         user_id = get_jwt_identity() #JWT获取id
-        shared_files = share_service.get_user_shares(user.id)
-        received_shares = share_service.get_received_shares(user.id)
+        shared_files = share_service.get_user_shares(user_id)
+        received_shares = share_service.get_received_shares(user_id)
         return jsonify({
             'sharedFiles': [share_service.to_dict(share) for share in shared_files],
             'receivedShares': [share_service.to_dict(share) for share in received_shares]

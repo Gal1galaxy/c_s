@@ -47,6 +47,21 @@ def create_share():
 @bp.route('/list', methods=['GET'])
 @login_required
 def list_shares():
+    ################################新增2025.5.4重构分享代码################################
+    """获取用户的分享列表"""
+    try:
+        shared_files = share_service.get_user_shares(request.current_user.id)
+        received_shares = share_service.get_received_shares(request.current_user.id)
+        return jsonify({
+            'sharedFiles': [share_service.to_dict(share) for share in shared_files],
+            'receivedShares': [share_service.to_dict(share) for share in received_shares]
+        }）
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    ################################新增2025.5.4重构分享代码################################
+    
+    '''
+    ################################初始代码################################
     """获取用户的分享列表"""
     try:
         print(f'current_user: {request.current_user.id}')
@@ -80,6 +95,8 @@ def list_shares():
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    ################################初始代码################################
+    '''
 
 @bp.route('/revoke/<int:share_id>', methods=['DELETE'])
 @login_required

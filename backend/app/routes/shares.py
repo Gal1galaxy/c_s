@@ -16,7 +16,8 @@ def create_share():
     try:
         data = request.get_json()
         file_id = data.get('fileId')
-        shared_with = data.get('sharedWith')  # 用户ID或null
+        shared_with_username = data.get('sharedWith')#更改2025.5.4初始代码：shared_with = data.get('sharedWith')  # 用户ID或null
+        
 
         if shared_with is not None:
             shared_with = int(shared_with)   #增加2025.5.4强制转int
@@ -28,6 +29,14 @@ def create_share():
         if expires_days:
             expires_at = datetime.utcnow() + timedelta(days=expires_days)
             
+        #新增2025.5.4如果有 sharedWith，需要通过用户名找到对应的 user_id
+        shared_with_id = None
+        if shared_with_username:
+            user = User.query.filter_by(username=shared_with_username).first()
+            if not user:
+                return jsonify({'error': '被分享的用户不存在'}), 400
+            shared_with_id = user.id
+        
         share = share_service.create_share(
             file_id=file_id,
             shared_by=get_jwt_identity(),#更改2025.5.4改成JWT验证shared_by=request.current_user.id,------>shared_by=get_jwt_identity(),

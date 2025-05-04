@@ -52,8 +52,8 @@ def list_shares():
     """获取用户的分享列表"""
     try:
         user_id = get_jwt_identity() #JWT获取id
-        shared_files = share_service.get_user_shares(request.user.id)
-        received_shares = share_service.get_received_shares(request.user.id)
+        shared_files = share_service.get_user_shares(user.id)
+        received_shares = share_service.get_received_shares(user.id)
         return jsonify({
             'sharedFiles': [share_service.to_dict(share) for share in shared_files],
             'receivedShares': [share_service.to_dict(share) for share in received_shares]
@@ -106,7 +106,7 @@ def revoke_share(share_id):
     """撤销分享"""
     try:
         user_id = get_jwt_identity()   #JWT获取user_id
-        if share_service.revoke_share(share_id, user.id):
+        if share_service.revoke_share(share_id, user_id):
             return jsonify({'message': '分享已撤销'})
         return jsonify({'error': '无权操作或分享不存在'}), 403
     except Exception as e:

@@ -10,14 +10,27 @@ const { Text } = Typography;
 //新增2025.5.5
 const handleCopyLink = (shareCode) => {
   const link = `${window.location.origin}/shares/${shareCode}`;
-  navigator.clipboard.writeText(link)
-    .then(() => {
-      message.success('分享链接已复制到剪贴板');
-    })
-    .catch(() => {
-      message.error('复制失败，请手动复制');
-    });
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link)
+      .then(() => {
+        message.success('分享链接已复制到剪贴板');
+      })
+      .catch(() => {
+        message.error('复制失败，请手动复制');
+      });
+  } else {
+    // 兼容老浏览器、http站点
+    const input = document.createElement('input');
+    input.value = link;
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand('copy');
+    document.body.removeChild(input);
+    message.success('分享链接已复制到剪贴板');
+  }
 };
+
 
 const SharedWithMeList = () => {
   const [shares, setShares] = useState([]);

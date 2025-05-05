@@ -92,7 +92,7 @@ function App() {
                     </PrivateRoute>
                   }
                 />
-                <Route path="/share/:shareCode" element={<ShareView />} />
+                <Route path="/shares/:shareCode" element={<ShareView />} />
               </Routes>
             </Content>
           </Layout>

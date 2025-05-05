@@ -23,7 +23,7 @@ const ShareView = () => {
     try {
       setLoading(true);
       const response = await shareService.getShareInfo(shareCode);
-      console.log('Share info:', response); // 调试日志
+      console.log('后端返回的完整response:', response); // 调试日志
       
       if (response?.share?.file?.id) {
         setShareInfo(response.share);

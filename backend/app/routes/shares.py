@@ -126,6 +126,7 @@ def revoke_share(share_id):
 def get_share_info(share_code):
     """通过分享码获取分享详情"""
     try:
+        print(f'收到分享码: {share_code}')
         share = share_service.get_share_by_code(share_code)
         if not share:
             return jsonify({'error': '分享不存在或已过期'}), 404
@@ -143,8 +144,8 @@ def get_share_info(share_code):
             if current_user_id is None or int(current_user_id) != int(share.shared_with):
                 return jsonify({'error': '没有权限访问此分享'}), 403
 
-        # 正常返回分享信息
-        return jsonify({
+        # 打印返回的数据
+        result = {
             'share': {
                 'id': share.id,
                 'file': {  
@@ -161,7 +162,9 @@ def get_share_info(share_code):
                 'createdAt': share.created_at.isoformat() if share.created_at else None,
                 'isExpired': getattr(share, 'is_expired', False)
             }
-        })
+        }
+        print('返回分享信息:', result)
+        return jsonify(result)
     except Exception as e:
         print(f'Error in get_share_info: {str(e)}')
         return jsonify({'error': str(e)}), 500

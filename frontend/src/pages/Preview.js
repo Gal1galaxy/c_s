@@ -86,47 +86,47 @@ const Preview = () => {
     console.log('File info:', file); // 调试日志
 
     // 如果是 Excel 文件
-    if (isExcelFile(file)) {
-      return <ExcelEditor fileId={fileId} fileInfo={file} />;
-    }
+  if (file.file_type?.includes('spreadsheet') || file.file_type?.includes('excel')) {
+  return <ExcelEditor fileId={fileId} fileInfo={file} />;
+}
 
     // 如果是文本文件
-    if (file.file_type?.startsWith('文本文件')) {
-      return (
-        <div style={{ whiteSpace: 'pre-wrap', padding: '16px' }}>
-          {file.content}
-        </div>
-      );
-    }
+    if (file.file_type?.startsWith('text/')) {
+  return (
+    <div style={{ whiteSpace: 'pre-wrap', padding: '16px' }}>
+      {file.content}
+    </div>
+  );
+
 
     // 如果是图片
-    if (file.file_type?.startsWith('图片')) {
-      return (
-        <div style={{ textAlign: 'center', padding: '16px' }}>
-          <img 
-            src={`data:${file.file_type};base64,${file.content}`}
-            alt={file.filename}
-            style={{ 
-              maxWidth: '100%',
-              maxHeight: '80vh',
-              objectFit: 'contain'
-            }}
-          />
-          <div style={{ marginTop: '8px', color: '#666' }}>
-            {file.width && file.height && `${file.width} x ${file.height}`}
-          </div>
-        </div>
-      );
-    }
+    if (file.file_type?.startsWith('image/')) {
+  return (
+    <div style={{ textAlign: 'center', padding: '16px' }}>
+      <img 
+        src={`data:${file.file_type};base64,${file.content}`}
+        alt={file.filename}
+        style={{ 
+          maxWidth: '100%',
+          maxHeight: '80vh',
+          objectFit: 'contain'
+        }}
+      />
+      <div style={{ marginTop: '8px', color: '#666' }}>
+        {file.width && file.height && `${file.width} x ${file.height}`}
+      </div>
+    </div>
+  );
+}
 
-    // 如果是 PDF
+    // 如果是 PDF 
     if (file.file_type === 'PDF') {
       return <PDFPreview fileInfo={file} />;
     }
-
-    if (file.file_type === 'Word') {
-      return <WordEditor fileId={fileId} fileInfo={file} />;
-    }
+    //如果是 Word
+    if (file.file_type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+  return <WordEditor fileId={fileId} fileInfo={file} />;
+}
     
     // 其他文件类型
     return (

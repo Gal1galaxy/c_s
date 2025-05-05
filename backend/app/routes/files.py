@@ -181,23 +181,41 @@ def preview_file(file_id):
     """预览文件"""
     try:
         share_code = request.args.get('shareCode')
-        
+        user_id = None
+        # 尝试从 token 里提取 user_id
+        auth_header = request.headers.get('Authorization')
+        if auth_header and auth_header.startswith('Bearer '):
+            from flask_jwt_extended import decode_token
+            try:
+                token = auth_header.split(' ')[1]
+                decoded_token = decode_token(token)
+                user_id = int(decoded_token['sub'])
+            except Exception as e:
+                print(f"Token decode error: {str(e)}")
+            
         if share_code:
             # 通过分享码访问
             share = share_service.get_share_by_code(share_code)
             if not share or share.file_id != file_id:
                 return jsonify({'error': '分享不存在或已过期'}), 404
-                
             if share.is_expired:
                 return jsonify({'error': '分享已过期'}), 403
+            # 检查是否私人分享
+            if share.shared_with is not None and user_id != share.shared_with:
+                return jsonify({'error': '没有权限访问此分享'}), 403
         else:
             # 直接访问需要验证权限
+            if not user_id:
+                return jsonify({'error': '请先登录'}), 401
             if not permission_service.can_read(current_user.id, file_id):
                 return jsonify({'error': '无权访问此文件'}), 403
         
         file = File.query.get_or_404(file_id)
-        return jsonify(file_service.to_dict(file))
+        # 调用 preview_service 获取预览内容
+        preview_data = preview_service.get_preview(file)
+        return jsonify(preview_data)
     except Exception as e:
+        print(f"Preview file error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/update/<int:file_id>', methods=['POST'])

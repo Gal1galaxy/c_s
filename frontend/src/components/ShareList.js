@@ -36,11 +36,39 @@ const ShareList = () => {
     }
   };
 
+  //####################2025.5.5重构复制链接####################
+const copyShareLink = async (shareCode) => {
+  const link = `${window.location.origin}/shares/${shareCode}`;
+  
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(link);
+      message.success('分享链接已复制到剪贴板');
+    } else {
+      // 兼容不支持navigator.clipboard 的情况
+      const textArea = document.createElement('textarea');
+      textArea.value = link;
+      textArea.style.position = 'fixed'; // 防止页面跳动
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      message.success('分享链接已复制到剪贴板');
+    }
+  } catch (error) {
+    console.error('复制失败:', error);
+    message.error('复制失败，请手动复制链接');
+  }
+};
+  //####################2025.5.5重构复制链接####################
+  /*##########初始代码##########
   const copyShareLink = (shareCode) => {
     const link = `${window.location.origin}/share/${shareCode}`;
     navigator.clipboard.writeText(link);
     message.success('分享链接已复制到剪贴板');
   };
+  ##########初始代码##########*/
 
   const renderShareItem = (share, isSharedByMe) => (
     <List.Item

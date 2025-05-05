@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { Card, Spin, Result, Button } from 'antd';
+import { Card, Spin, Result, Button, message} from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import ExcelEditor from '../components/ExcelEditor';
 import WordEditor from '../components/WordEditor';
 import axios from 'axios';
-import { message } from 'antd';
 import PDFPreview from '../components/PDFPreview';
 
 const Preview = () => {
@@ -71,8 +70,7 @@ const Preview = () => {
           status="404"
           title="文件不存在"
           subTitle="请确认文件是否已被删除"
-          extra={
-            <Button type="primary" onClick={() => navigate('/files')}>
+          extra={<Button type="primary" onClick={() => navigate('/files')}>
               返回文件列表
             </Button>
           }
@@ -86,17 +84,17 @@ const Preview = () => {
     console.log('File info:', file); // 调试日志
 
     // 如果是 Excel 文件
-  if (file.file_type?.includes('spreadsheet') || file.file_type?.includes('excel')) {
+  if (isExcelFile(file)) {
   return <ExcelEditor fileId={fileId} fileInfo={file} />;
-}
+  }
+
 
     // 如果是文本文件
-    if (file.file_type?.startsWith('text/')) {
-  return (
-    <div style={{ whiteSpace: 'pre-wrap', padding: '16px' }}>
+    if (file.file_type?.startsWith('text/')) {return (<div style={{ whiteSpace: 'pre-wrap', padding: '16px' }}>
       {file.content}
     </div>
   );
+}
 
 
     // 如果是图片

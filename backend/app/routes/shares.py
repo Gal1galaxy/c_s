@@ -121,7 +121,38 @@ def revoke_share(share_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@bp.route('/<share_code>')
+@bp.route('/<share_code>',methods=['GET'])
+############################更改2025.5.5重构分享代码############################
+def get_share_info(share_code):
+    """通过分享码获取分享详情"""
+    try:
+        share = share_service.get_share_by_code(share_code)
+        if not share:
+            return jsonify({'error': '分享不存在或已过期'}), 404
+            
+        # 手动构建返回数据结构，符合前端要求
+        return jsonify({
+            'share': {
+                'id': share.id,
+                'file': {
+                    'filename': share.file.filename,
+                    'file_type': share.file.file_type,
+                    'file_size': share.file.file_size
+            },
+            'shareCode': share.share_code,
+            'sharedBy': share.owner.username if share.owner else None,
+            'sharedWith': share.recipient.username if share.recipient else None,
+            'canWrite': share.can_write,
+            'expiresAt': share.expires_at.isoformat() if share.expires_at else None,
+            'createdAt': share.created_at.isoformat() if share.created_at else None,
+            'isExpired': getattr(share, 'is_expired', False)
+         }
+        })
+    except Exception as e:
+         print(f'Error in get_share_info: {str(e)}')
+         return jsonify({'error': str(e)}), 500
+############################更改2025.5.5重构分享代码############################
+'''###############初始代码###############
 def get_share_info(share_code):
     """获取分享信息"""
     try:
@@ -136,3 +167,4 @@ def get_share_info(share_code):
     except Exception as e:
         print(f'Error in get_share_info: {str(e)}')
         return jsonify({'error': str(e)}), 500 
+###############初始代码###############'''

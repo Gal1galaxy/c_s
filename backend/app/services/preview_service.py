@@ -102,5 +102,5 @@ class PreviewService:
                 
         return {
             'type': 'word',
-            'content': content
+            'content': '\n'.join(content)  # 把list连接成字符串
         } 

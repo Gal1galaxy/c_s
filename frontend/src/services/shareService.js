@@ -25,7 +25,12 @@ export const shareService = {
   // 获取分享信息
   async getShareInfo(shareCode) {
     try {
-      const response = await axios.get(`/api/shares/${shareCode}`);
+      const token = localStorage.getItem('token'); // 从本地存储取出JWT
+      const response = await axios.get(`/api/shares/${shareCode}`,{
+        headers: {
+          Authorization: token ? `Bearer ${token}` : ''
+        }
+      });
       return response.data;
     } catch (error) {
       throw error;

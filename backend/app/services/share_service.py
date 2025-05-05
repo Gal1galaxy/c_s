@@ -3,7 +3,8 @@ from app.models.share import FileShare
 from app.models.file import File
 from datetime import datetime
 import secrets
-from sqlalchemy import or_
+from sqlalchemy import or_            #增加2025.5.4
+from sqlalchemy.orm import joinedload #增加2025.5.5
 
 class ShareService:
     def create_share(self, file_id, shared_by, shared_with=None, can_write=False, expires_at=None):
@@ -26,7 +27,7 @@ class ShareService:
     
     def get_share_by_code(self, share_code):
         """通过分享码获取分享信息"""
-        share = FileShare.query.filter_by(share_code=share_code).first()
+        share = FileShare.query.options(joinedload(FileShare.file)).filter_by(share_code=share_code).first() #更改2025.5.5share = FileShare.query.filter_by(share_code=share_code).first()
         if not share:
             return None
             

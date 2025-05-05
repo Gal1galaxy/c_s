@@ -1,4 +1,4 @@
-from flask_jwt_extended import verify_jwt_in_request_optional, get_jwt_identity   #JWT机制
+from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity   #JWT机制
 from flask import Blueprint, request, jsonify
 from app.services.share_service import ShareService
 from app.services.file_service import FileService
@@ -132,13 +132,16 @@ def get_share_info(share_code):
 
         # 检查是否私人分享
         if share.shared_with is not None:
-            # 私人分享，需要身份验证
-            verify_jwt_in_request_optional()
-            current_user_id = get_jwt_identity()
+            try:
+                verify_jwt_in_request()
+                current_user_id = get_jwt_identity()
+            except Exception:
+                current_user_id = None
+
             if current_user_id is None or int(current_user_id) != int(share.shared_with):
                 return jsonify({'error': '没有权限访问此分享'}), 403
 
-        # 公开分享，或者本人访问，正常返回数据
+        # 正常返回分享信息
         return jsonify({
             'share': {
                 'id': share.id,

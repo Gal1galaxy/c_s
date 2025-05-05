@@ -17,19 +17,31 @@ const handleCopyLink = (shareCode) => {
         message.success('分享链接已复制到剪贴板');
       })
       .catch(() => {
-        message.error('复制失败，请手动复制');
+        fallbackCopyTextToClipboard(link);
       });
   } else {
-    // 兼容老浏览器、http站点
-    const input = document.createElement('input');
-    input.value = link;
-    document.body.appendChild(input);
-    input.select();
-    document.execCommand('copy');
-    document.body.removeChild(input);
-    message.success('分享链接已复制到剪贴板');
+    fallbackCopyTextToClipboard(link);
   }
 };
+
+function fallbackCopyTextToClipboard(text) {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.style.position = "fixed";  // 避免页面跳动
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    document.execCommand('copy');
+    message.success('分享链接已复制到剪贴板');
+  } catch (err) {
+    message.error('复制失败，请手动复制');
+  }
+
+  document.body.removeChild(textArea);
+}
+
 
 
 const SharedWithMeList = () => {

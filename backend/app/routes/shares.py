@@ -123,7 +123,6 @@ def revoke_share(share_id):
 
 @bp.route('/<share_code>',methods=['GET'])
 ############################更改2025.5.5重构分享代码############################
-@bp.route('/<share_code>', methods=['GET'])
 def get_share_info(share_code):
     """通过分享码获取分享详情"""
     try:
@@ -131,7 +130,6 @@ def get_share_info(share_code):
         if not share:
             return jsonify({'error': '分享不存在或已过期'}), 404
             
-        # 按前端期待的格式返回
         return jsonify({
             'share': {
                 'id': share.id,
@@ -153,6 +151,7 @@ def get_share_info(share_code):
     except Exception as e:
         print(f'Error in get_share_info: {str(e)}')
         return jsonify({'error': str(e)}), 500
+
 ############################更改2025.5.5重构分享代码############################
 '''###############初始代码###############
 def get_share_info(share_code):

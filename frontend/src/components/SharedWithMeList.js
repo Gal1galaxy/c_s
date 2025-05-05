@@ -7,6 +7,17 @@ import { formatFileSize } from '../utils/fileUtils';
 import { useNavigate } from 'react-router-dom';
 
 const { Text } = Typography;
+//新增2025.5.5
+const handleCopyLink = (shareCode) => {
+  const link = `${window.location.origin}/shares/${shareCode}`;
+  navigator.clipboard.writeText(link)
+    .then(() => {
+      message.success('分享链接已复制到剪贴板');
+    })
+    .catch(() => {
+      message.error('复制失败，请手动复制');
+    });
+};
 
 const SharedWithMeList = () => {
   const [shares, setShares] = useState([]);
@@ -51,9 +62,14 @@ const SharedWithMeList = () => {
             </Button>,
             <Button
               icon={<DownloadOutlined />}
-              onClick={() => {/* 实现下载功能 */}}
+              onClick={() => {/* 后续完善实现下载功能 */}}
             >
               下载
+            </Button>,
+            <Button
+               onClick={() => handleCopyLink(share.shareCode)}
+            >
+               复制链接
             </Button>
           ]}
         >

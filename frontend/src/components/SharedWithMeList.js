@@ -16,7 +16,8 @@ const handleCopyLink = (shareCode) => {
       .then(() => {
         message.success('分享链接已复制到剪贴板');
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error('Clipboard API not available, falling back', err);
         fallbackCopyTextToClipboard(link);
       });
   } else {
@@ -27,22 +28,25 @@ const handleCopyLink = (shareCode) => {
 function fallbackCopyTextToClipboard(text) {
   const textArea = document.createElement("textarea");
   textArea.value = text;
-  textArea.style.position = "fixed";  // 避免页面跳动
+  textArea.style.position = "fixed";
   document.body.appendChild(textArea);
   textArea.focus();
   textArea.select();
 
   try {
-    document.execCommand('copy');
-    message.success('分享链接已复制到剪贴板');
+    const successful = document.execCommand('copy');
+    if (successful) {
+      message.success('分享链接已复制到剪贴板');
+    } else {
+      message.error('复制失败，请手动复制');
+    }
   } catch (err) {
+    console.error('Fallback copy failed', err);
     message.error('复制失败，请手动复制');
   }
 
   document.body.removeChild(textArea);
 }
-
-
 
 const SharedWithMeList = () => {
   const [shares, setShares] = useState([]);

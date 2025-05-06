@@ -281,7 +281,7 @@ def get_file_content(file_id):
     """查看文件内容（支持预览各种类型）"""
     try:
         share_code = request.args.get('shareCode')
-        user_id = get_user_id_from_token()
+        #user_id = get_user_id_from_token()
 
         if share_code:
             share = share_service.get_share_by_code(share_code)

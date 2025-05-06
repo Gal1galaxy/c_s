@@ -285,6 +285,15 @@ def get_file_content(file_id):
         share = None  # 初始化 share 变量
         has_permission = True  # 默认有权限
         user_id = get_user_id_from_token()
+        auth_header = request.headers.get('Authorization')
+        if auth_header and auth_header.startswith('Bearer '):
+            from flask_jwt_extended import decode_token
+            try:
+                token = auth_header.split(' ')[1]
+                decoded_token = decode_token(token)
+                user_id = int(decoded_token['sub'])
+            except Exception as e:
+                print(f"Token decode error: {str(e)}")
         
         if share_code:
             # 通过分享码访问

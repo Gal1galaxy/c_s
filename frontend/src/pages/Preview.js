@@ -123,7 +123,7 @@ const Preview = () => {
     }
     
     // 如果是 Word
-    if (file.file_type === 'word') {
+    if (file.file_type?.toLowerCase() === 'word') {
   return (
     <div style={{ whiteSpace: 'pre-wrap', padding: '16px' }}>
       {file.content}

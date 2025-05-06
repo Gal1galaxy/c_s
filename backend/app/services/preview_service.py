@@ -101,6 +101,6 @@ class PreviewService:
                 content.append(paragraph.text)
                 
         return {
-            'file_type': 'word',
+            'type': 'word',
             'content': '\n'.join(content)  # 把list连接成字符串
         } 

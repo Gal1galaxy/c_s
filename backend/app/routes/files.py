@@ -284,7 +284,7 @@ def get_file_content(file_id):
         share_code = request.args.get('shareCode')
         share = None  # 初始化 share 变量
         has_permission = True  # 默认有权限
-        user_id = get_user_id_from_token()
+        user_id = None
         auth_header = request.headers.get('Authorization')
         if auth_header and auth_header.startswith('Bearer '):
             from flask_jwt_extended import decode_token

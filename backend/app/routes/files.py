@@ -281,7 +281,17 @@ def get_file_content(file_id):
     """查看文件内容（支持预览各种类型）"""
     try:
         share_code = request.args.get('shareCode')
-        user_id = get_user_id_from_token()
+        user_id = None
+
+        auth_header = request.headers.get('Authorization')
+        if auth_header and auth_header.startswith('Bearer '):
+            try:
+                from flask_jwt_extended import decode_token
+                token = auth_header.split(' ')[1]
+                decoded_token = decode_token(token)
+                user_id = int(decoded_token['sub'])
+            except Exception:
+                user_id = None
 
         if share_code:
             share = share_service.get_share_by_code(share_code)

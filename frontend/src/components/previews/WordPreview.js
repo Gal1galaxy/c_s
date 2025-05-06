@@ -29,8 +29,6 @@ const WordPreview = ({ data }) => {
 export default WordPreview;
 
 
-export default WordPreview;
-
 /*###########初始代码###########
 import React from 'react';
 import { Typography } from 'antd';

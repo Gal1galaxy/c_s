@@ -29,6 +29,7 @@ const FileUpload = ({ onSuccess }) => {
       }
     } finally {
       setUploading(false);
+    }
   };
 
   return (

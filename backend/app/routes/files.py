@@ -278,47 +278,6 @@ def get_file(file_id):
 
 @bp.route('/<int:file_id>/content', methods=['GET'])
 def get_file_content(file_id):
-    """查看文件内容（支持预览各种类型）"""
-    try:
-        share_code = request.args.get('shareCode')
-        user_id = None
-
-        auth_header = request.headers.get('Authorization')
-        if auth_header and auth_header.startswith('Bearer '):
-            try:
-                from flask_jwt_extended import decode_token
-                token = auth_header.split(' ')[1]
-                decoded_token = decode_token(token)
-                user_id = int(decoded_token['sub'])
-            except Exception:
-                user_id = None
-
-        if share_code:
-            share = share_service.get_share_by_code(share_code)
-            if not share or share.file_id != file_id:
-                return jsonify({'error': '分享不存在或已过期'}), 404
-            if share.is_expired:
-                return jsonify({'error': '分享已过期'}), 403
-            if share.shared_with and share.shared_with != user_id:
-                return jsonify({'error': '没有权限访问此分享'}), 403
-        else:
-            if not user_id:
-                return jsonify({'error': '请先登录'}), 401
-            if not permission_service.can_read(user_id, file_id):
-                return jsonify({'error': '无权访问此文件'}), 403
-
-        file = File.query.get_or_404(file_id)
-
-        # 🔥 统一用 preview_service 处理
-        preview_data = preview_service.get_preview(file)
-
-        return jsonify(preview_data)
-    except Exception as e:
-        print(f"Get content error: {str(e)}")
-        return jsonify({'error': str(e)}), 500
-
-'''
-def get_file_content(file_id):
     """获取文件内容"""
     try:
         print(f"Getting content for file_id: {file_id}")  # 调试日志
@@ -389,7 +348,7 @@ def get_file_content(file_id):
     except Exception as e:
         print(f"Error in get_file_content route: {str(e)}")  # 调试日志
         return jsonify({'error': str(e)}), 500
-        '''
+        
 
 @bp.route('/<int:file_id>/content', methods=['POST'])
 def update_file_content(file_id):

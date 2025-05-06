@@ -13,7 +13,7 @@ const FileUpload = ({ onSuccess }) => {
       
       await axios.post('/api/files/upload', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'        //axios.post加上请求头
+          'Content-Type': 'multipart/form-data'        //新增2025.5.6 axios.post加上请求头
         }
       });
       message.success('文件上传成功');

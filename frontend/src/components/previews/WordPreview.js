@@ -5,21 +5,19 @@ import { Typography } from 'antd';
 const { Paragraph } = Typography;
 
 const WordPreview = ({ data }) => {
-  console.log('WordPreview 接收到的 data:', data);  // ★调试打印！
+  console.log('WordPreview 接收到的 data:', data);
 
   if (!data || !data.content) {
-    return <div>没有内容可预览</div>; // 如果 content 是空的，显示一行字
+    return <div>没有内容可预览</div>;
   }
 
-  const paragraphs = typeof data.content === 'string' 
-    ? data.content.split('\n') 
-    : data.content;  // 如果是字符串，切割成数组
+  const paragraphs = Array.isArray(data.content) ? data.content : data.content.split('\n');
 
   return (
     <div style={{ padding: '20px' }}>
       {paragraphs.map((paragraph, index) => (
         <Paragraph key={index}>
-          {paragraph}
+          {typeof paragraph === 'string' ? paragraph : paragraph.text || JSON.stringify(paragraph)}
         </Paragraph>
       ))}
     </div>

@@ -389,6 +389,7 @@ def get_file_content(file_id):
     except Exception as e:
         print(f"Error in get_file_content route: {str(e)}")  # 调试日志
         return jsonify({'error': str(e)}), 500
+        '''
 
 @bp.route('/<int:file_id>/content', methods=['POST'])
 def update_file_content(file_id):
@@ -419,7 +420,6 @@ def update_file_content(file_id):
         return jsonify({'message': '更新成功'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-        '''
 
 @bp.route('/files/<int:file_id>/logs')
 @jwt_required()

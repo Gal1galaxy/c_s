@@ -5,14 +5,15 @@ import { Typography } from 'antd';
 const { Paragraph } = Typography;
 
 const WordPreview = ({ data }) => {
+  console.log('WordPreview 接收到的 data:', data);  // ★调试打印！
+
   if (!data || !data.content) {
-    return <div style={{ padding: '20px' }}>没有内容可预览</div>;
+    return <div>没有内容可预览</div>; // 如果 content 是空的，显示一行字
   }
 
-  // 如果 content 是字符串，则按换行符分割成数组
-  const paragraphs = typeof data.content === 'string'
-    ? data.content.split('\n')
-    : data.content;
+  const paragraphs = typeof data.content === 'string' 
+    ? data.content.split('\n') 
+    : data.content;  // 如果是字符串，切割成数组
 
   return (
     <div style={{ padding: '20px' }}>
@@ -24,6 +25,9 @@ const WordPreview = ({ data }) => {
     </div>
   );
 };
+
+export default WordPreview;
+
 
 export default WordPreview;
 

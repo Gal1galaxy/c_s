@@ -89,7 +89,7 @@ def download_file(file_id):
         
         file = File.query.get_or_404(file_id)
         
-        '''2025.5.1更改文件下载逻辑（初始代码）
+        '''#########件下载逻辑（初始代码）#########
         return send_file(
             file_service.get_decrypted_file_path(file),
             as_attachment=True,
@@ -97,9 +97,9 @@ def download_file(file_id):
         )
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-        2025.5.1更改文件下载逻辑（初始代码）'''
+        #########下载逻辑（初始代码）#########'''
         
-         #########新增2025.5.1更改文件下载逻辑#########
+         ##################新增2025.5.1更改文件下载逻辑##################
          # 获取解密后的临时文件路径（发送文件）
         temp_path = file_service.get_decrypted_file_path(file)
 
@@ -116,7 +116,7 @@ def download_file(file_id):
     except Exception as e:
         print(f"Download file error: {str(e)}")  # 打印错误日志
         return jsonify({'error': str(e)}), 500
-         #########新增2025.5.1更改文件下载逻辑#########    
+         ##################新增2025.5.1更改文件下载逻辑##################    
         
 @bp.route('/list', methods=['GET'])
 @login_required

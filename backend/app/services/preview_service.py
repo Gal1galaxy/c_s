@@ -15,6 +15,8 @@ class PreviewService:
         """获取文件预览数据"""
         if not file:
             return None
+
+        print(f"[DEBUG] File type to preview: {file.file_type}")
             
         # 获取解密后的文件路径
         file_path = self.file_service.get_decrypted_file_path(file)

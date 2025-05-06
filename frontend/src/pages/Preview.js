@@ -7,6 +7,7 @@ import ExcelEditor from '../components/ExcelEditor';
 import WordEditor from '../components/WordEditor';
 import axios from 'axios';
 import PDFPreview from '../components/PDFPreview';
+import WordPreview from '../components/previews/WordPreview';
 
 const Preview = () => {
   const { fileId } = useParams();
@@ -124,12 +125,17 @@ const Preview = () => {
     
     // 如果是 Word
     if (file.file_type?.toLowerCase() === 'word') {
+      return <WordPreview data={file} />;
+    }
+/*
+    if (file.file_type?.toLowerCase() === 'word') {
   return (
     <div style={{ whiteSpace: 'pre-wrap', padding: '16px' }}>
       {file.content}
     </div>
   );
 }
+*/
 
     
     // 其他文件类型

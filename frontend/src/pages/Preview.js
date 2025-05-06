@@ -121,10 +121,16 @@ const Preview = () => {
     if (file.file_type === 'PDF') {
       return <PDFPreview fileInfo={file} />;
     }
-    //如果是 Word
-    if (file.file_type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-  return <WordEditor fileId={fileId} fileInfo={file} />;
+    
+    // 如果是 Word
+    if (file.file_type === 'word') {
+  return (
+    <div style={{ whiteSpace: 'pre-wrap', padding: '16px' }}>
+      {file.content}
+    </div>
+  );
 }
+
     
     // 其他文件类型
     return (

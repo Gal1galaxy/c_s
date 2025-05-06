@@ -101,6 +101,8 @@ class PreviewService:
         for paragraph in doc.paragraphs:
             if paragraph.text.strip():
                 content.append(paragraph.text)
+        if not content:
+            content.append('(无法识别Word文档内容)')
                 
         return {
             'type': 'word',

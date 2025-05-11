@@ -1,4 +1,5 @@
 from dateutil.parser import parse #2025.5.11解决时间同步问题
+from sqlalchemy import func  #2025.5.11解决时间同步问题
 from app import db
 from app.models.operation_log import OperationLog as Log
 from flask import request
@@ -41,14 +42,14 @@ class LogService:
         if start_date:  #筛选日期过滤
             try:
                 start = parse(start_date)
-                query = query.filter(Log.created_at >= start)
+                query = query.filter(func.date(Log.created_at) >= start.date())
             except Exception:
                 pass
 
         if end_date:
             try:
                 end = parse(end_date)
-                query = query.filter(Log.created_at <= end)
+                query = query.filter(func.date(Log.created_at) <= end.date())
             except Exception:
                 pass
 

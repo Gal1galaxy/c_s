@@ -1,11 +1,5 @@
 import axios from 'axios';
 
-// 创建独立 axios 实例
-const api = axios.create({
-  baseURL: '/api', // 可选
-  timeout: 10000,  // 可选
-});
-
 // 添加请求拦截器
 axios.interceptors.request.use(
   (config) => {
@@ -36,4 +30,3 @@ axios.interceptors.response.use(
   }
 ); 
 
-export default api;

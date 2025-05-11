@@ -52,6 +52,12 @@ class LogService:
                 query = query.filter(Log.created_at <= end)
             except Exception as e:
                 print(f"end_date parse error: {e}")
+
+
+        print("start:", start)
+        print("end:", end)
+        print("最终SQL语句：", str(query.statement.compile(compile_kwargs={'literal_binds': True})))
+
         
 
         return query.order_by(Log.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)

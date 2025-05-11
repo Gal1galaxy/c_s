@@ -9,12 +9,13 @@ class LogService:
     def log_action(action, resource_type, resource_id, details=None, status='success'):
         """记录用户操作"""
         try:
-            log = Log(
+            log = OperationLog(
                 user_id=request.current_user.id,
                 operation_type=action,
                 resource_type=resource_type,
-                resource_id=resource_id,
-                details=details,
+                file_id=resource_id,
+                operation_detail=details,
+                created_at=datetime.utcnow(),
                 ip_address=request.remote_addr,
                 user_agent=request.user_agent.string,
                 status=status

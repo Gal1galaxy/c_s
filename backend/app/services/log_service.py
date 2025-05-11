@@ -53,8 +53,7 @@ class LogService:
         except ValueError:
             pass  # 忽略格式错误
 
-    return query.order_by(Log.created_at.desc())\
-                .paginate(page=page, per_page=per_page, error_out=False)
+    return query.order_by(Log.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
 
     ###########################2025.5.11更改###########################
     '''###################og code####################

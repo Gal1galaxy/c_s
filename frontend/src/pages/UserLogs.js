@@ -62,7 +62,7 @@ const UserLogs = () => {
       title: '操作时间',
       dataIndex: 'created_at',
       key: 'created_at',
-      render: (text) => moment(text).format('YYYY-MM-DD HH:mm:ss'),
+      render: (text) => moment.utc(text).local().format('YYYY-MM-DD HH:mm:ss'),
       width: 180,
     },
     {

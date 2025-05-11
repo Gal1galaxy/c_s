@@ -1,3 +1,4 @@
+from dateutil.parser import parse #2025.5.11解决时间同步问题
 from app import db
 from app.models.operation_log import OperationLog as Log
 from flask import request
@@ -36,20 +37,19 @@ class LogService:
 
         if action:
             query = query.filter(Log.action == action)
-
-        if start_date:
+             
+        if start_date:  #筛选日期过滤
             try:
-                start = datetime.strptime(start_date, "%Y-%m-%d")
+                start = parse(start_date)
                 query = query.filter(Log.created_at >= start)
-            except ValueError:
+            except Exception:
                 pass
 
         if end_date:
             try:
-                end = datetime.strptime(end_date, "%Y-%m-%d")
-                end = end.replace(hour=23, minute=59, second=59)
+                end = parse(end_date)
                 query = query.filter(Log.created_at <= end)
-            except ValueError:
+            except Exception:
                 pass
 
         return query.order_by(Log.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)

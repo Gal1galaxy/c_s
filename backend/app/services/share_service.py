@@ -1,3 +1,4 @@
+from app.models.operation_log import OperationLog
 from app import db
 from app.models.share import FileShare
 from app.models.file import File

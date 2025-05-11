@@ -554,7 +554,7 @@ class FileService:
                     user_id=file.owner_id,
                     file_id=file.id,
                     operation_type='edit',
-                    operation_detail='编辑文件:{file.filename}'
+                    operation_detail=f'编辑文件:{file.filename}'
                 )
                 
                 return True

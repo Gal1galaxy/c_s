@@ -9,7 +9,7 @@ class LogService:
     def log_action(action, resource_type, resource_id, details=None, status='success'):
         """记录用户操作"""
         try:
-            log = OperationLog(
+            log = Log(
                 user_id=request.current_user.id,
                 operation_type=action,
                 resource_type=resource_type,

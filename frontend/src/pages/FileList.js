@@ -237,40 +237,43 @@ const FileList = () => {
 //###################2025.5.11前端新界面###################
   return (
     <div style={{ padding: '24px' }}>
-    <Card bordered={false} style={{ marginBottom: '24px' }}>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', padding: '8px 0' }}>
-    <Title level={3} style={{ margin: 0 }}>我的文件</Title><FileUpload onSuccess={fetchFiles} /></div>
-    <Row gutter={[16, 16]} style={{ marginTop: '8px' }}>
-    <Col xs={24} sm={12} md={8} lg={6}>
-    <Card
-    style={{
-      borderRadius: '12px',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-        }}
-    >
-      <Statistic
-      title="文件总数"
-        value={stats.totalFiles}
-          prefix={<FileOutlined style={{ color: '#1890ff' }} />}
-            />
+     <Card bordered={false} style={{ marginBottom: '24px' }}>
+        <div 
+          style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            flexWrap: 'wrap', 
+            padding: '8px 0' 
+          }}
+         >
+          <Title level={3} style={{ margin: 0 }}>
+            我的文件
+          </Title>
+          <FileUpload onSuccess={fetchFiles} />
+         </div>
+         <Row gutter={[16, 16]} style={{ marginTop: '8px' }}>
+           <Col xs={24} sm={12} md={8} lg={6}>
+             <Card style={{ borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)'}}>
+                <Statistic
+                  title="文件总数"
+                  value={stats.totalFiles}
+                  prefix={<FileOutlined style={{ color: '#1890ff' }} />}
+                />
+              </Card>
+             </Col>
+             <Col xs={24} sm={12} md={8} lg={6}>
+               <Card style={{ borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)'}}>
+                 <Statistic
+                   title="存储空间"
+                   value={(stats.totalSize / (1024 * 1024)).toFixed(2)}
+                   suffix="MB"
+                   prefix={<CloudUploadOutlined style={{ color: '#52c41a' }} />}
+                 />
+               </Card>
+              </Col>
+             </Row> 
             </Card>
-            </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
-  <Card
-    style={{
-      borderRadius: '12px',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-    }}
-  >
-    <Statistic
-      title="存储空间"
-      value={(stats.totalSize / (1024 * 1024)).toFixed(2)}
-      suffix="MB"
-      prefix={<CloudUploadOutlined style={{ color: '#52c41a' }} />}
-    />
-  </Card>
-</Col>
-</Row> </Card>
         {/*###################2025.5.11前端新界面###################*/}
         {/*############初始代码############
     return (

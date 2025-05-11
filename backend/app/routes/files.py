@@ -318,9 +318,11 @@ def get_file_content(file_id):
             print(f"Share permission: can_write={has_permission}")  # 调试日志
         else:
             # 直接访问需要验证权限
+            '''##########初始代码##########
             if not hasattr(current_user, 'id'):
                 print("User not logged in")  # 调试日志
                 return jsonify({'error': '请先登录'}), 401
+            ##########初始代码##########'''
                 
             if not permission_service.can_read(current_user.id, file_id):
                 print(f"No read permission for user {current_user.id}")  # 调试日志

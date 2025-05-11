@@ -1,9 +1,10 @@
 import React from 'react';
-import { Form, Input, Button, Card, message } from 'antd';
+import { Form, Input, Button, Card, message,Typography, } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
+const { Title, Text } = Typography;
 const Register = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = React.useState(false);

@@ -172,7 +172,7 @@ const FileList = () => {
       dataIndex: 'created_at',
       key: 'created_at',
       width: 200,
-      render: (date) => new Date(date).toLocaleString(),
+      render: (date) => moment(date).local().format('YYYY-MM-DD HH:mm:ss'),
     },
     {
       title: '操作',

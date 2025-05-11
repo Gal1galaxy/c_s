@@ -5,6 +5,7 @@ from app.models.operation_log import OperationLog
 from app.models.user import User
 from app.models.file import File
 from app import db
+from datetime import datetime
 
 bp = Blueprint('logs', __name__, url_prefix='/api/logs')
 
@@ -32,6 +33,10 @@ def get_user_operation_logs(user_id):
         # 获取分页参数
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 20, type=int)
+
+        action = request.args.get('action')
+        start_date_str = request.args.get('start_date')
+        end_date_str = request.args.get('end_date')
         
         # 查询日志
         query = db.session.query(
@@ -46,6 +51,28 @@ def get_user_operation_logs(user_id):
         ).outerjoin(
             File, OperationLog.file_id == File.id
         ).order_by(OperationLog.created_at.desc())
+
+        # 筛选操作类型
+        if action:
+            query = query.filter(OperationLog.operation_type == action)
+
+        # 筛选时间范围
+        if start_date_str:
+            try:
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+                query = query.filter(OperationLog.created_at >= start_date)
+            except: 
+                 pass
+        if end_date_str:
+            try:
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+                end_date = end_date.replace(hour=23, minute=59, second=59)
+                query = query.filter(OperationLog.created_at <= end_date)
+            except:
+                pass
+
+        # 排序分页
+        query = query.order_by(OperationLog.created_at.desc())
         
         # 执行分页查询
         pagination = query.paginate(

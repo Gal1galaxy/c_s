@@ -45,7 +45,7 @@ class LogService:
             if end_date:
                 end = parser.parse(end_date)
                 query = query.filter(Log.created_at <= end.strftime("%Y-%m-%d %H:%M:%S"))
-            except Exception as e:
+        except Exception as e:
                 print("时间解析失败:", e)
 
           # 打印调试信息

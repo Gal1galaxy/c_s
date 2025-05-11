@@ -1,9 +1,10 @@
 import React from 'react';
-import { Form, Input, Button, Card, message } from 'antd';
+import { Form, Input, Button, Card, message, Typography } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
+const { Title, Text } = Typography;
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();

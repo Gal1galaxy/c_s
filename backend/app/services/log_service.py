@@ -41,17 +41,17 @@ class LogService:
              
         if start_date:  #筛选日期过滤
             try:
-                start = parse(start_date)
-                query = query.filter(func.date(Log.created_at) >= start.date())
-            except Exception:
-                pass
+                start = parser.isoparse(start_date)
+                query = query.filter(Log.created_at >= start)
+            except Exception as e:
+                print(f"start_date parse error: {e}")
 
         if end_date:
             try:
-                end = parse(end_date)
-                query = query.filter(func.date(Log.created_at) <= end.date())
-            except Exception:
-                pass
+                end = parser.isoparse(end_date)
+                query = query.filter(Log.created_at <= end)
+            except Exception as e:
+                print(f"end_date parse error: {e}")
 
         return query.order_by(Log.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
 

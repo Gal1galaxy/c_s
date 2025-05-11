@@ -32,7 +32,7 @@ class LogService:
     @staticmethod
     ###########################2025.5.11更改###########################
     def get_user_logs(user_id, page=1, per_page=20, action=None, start_date=None, end_date=None):
-    """获取用户的操作日志，支持筛选"""
+     """获取用户的操作日志"""
     query = Log.query.filter_by(user_id=user_id)
 
     if action:

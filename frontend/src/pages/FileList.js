@@ -50,7 +50,7 @@ const FileList = () => {
   const handleDelete = async (fileId) => {
     try {
       //2025.5.11注释掉改为下行await axios.delete(`/api/files/${fileId}`);
-      await api.delete(/api/files/${fileId});
+      await api.delete(`/api/files/${fileId}`);
       message.success('文件删除成功');
       fetchFiles();
     } catch (error) {

@@ -205,10 +205,12 @@ def preview_file(file_id):
                 return jsonify({'error': '没有权限访问此分享'}), 403
         else:
             # 直接访问需要验证权限
-            if not user_id:
-                return jsonify({'error': '请先登录'}), 401
-            if not permission_service.can_read(current_user.id, file_id):
+            if not permission_service.can_read(user_id, file_id):
+                print(f"No read permission for user {user_id}")  # 调试日志
                 return jsonify({'error': '无权访问此文件'}), 403
+
+            has_permission = permission_service.can_write(user_id, file_id)
+            print(f"直接访问允许: can_write={has_permission}")  # 调试日志
         
         file = File.query.get_or_404(file_id)
         # 调用 preview_service 获取预览内容

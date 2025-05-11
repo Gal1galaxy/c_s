@@ -1,5 +1,5 @@
 from dateutil import parser  #2025.5.11解决时间同步问题
-from sqlalchemy import func, text  #2025.5.11解决时间同步问题
+from sqlalchemy import func #2025.5.11解决时间同步问题
 from app import db
 from app.models.operation_log import OperationLog as Log
 from flask import request
@@ -38,21 +38,20 @@ class LogService:
 
         if action:
             query = query.filter(Log.operation_type == action)
-             
-        if start_date:  #筛选日期过滤
-            try:
-                query = query.filter(Log.created_at >= start_date)
+        try:
+            if start_date:  #筛选日期过滤
+                start = parser.parse(start_date)
+                query = query.filter(Log.created_at >= start.strftime("%Y-%m-%d %H:%M:%S"))
+            if end_date:
+                end = parser.parse(end_date)
+                query = query.filter(Log.created_at <= end.strftime("%Y-%m-%d %H:%M:%S"))
             except Exception as e:
-                print(f"start_date parse error: {e}")
+                print("时间解析失败:", e)
 
-        if end_date:
-            try:
-                query = query.filter(Log.created_at <= end_date)
-            except Exception as e:
-                print(f"end_date parse error: {e}")
-
-        print(query.statement.compile(compile_kwargs={"literal_binds": True}))
+          # 打印调试信息
+        print("📅 最终SQL：", query.statement.compile(compile_kwargs={"literal_binds": True}))
         return query.order_by(Log.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
+
 
     @staticmethod
     def get_resource_logs(resource_type, resource_id, page=1, per_page=20):

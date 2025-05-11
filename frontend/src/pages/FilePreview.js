@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Card, Spin, message } from 'antd';
+import { Card, Spin, message, Typography, Result, } from 'antd';
 import axios from 'axios';
 import ImagePreview from '../components/previews/ImagePreview';
 import PDFPreview from '../components/previews/PDFPreview';
 import TextPreview from '../components/previews/TextPreview';
 import ExcelPreview from '../components/previews/ExcelPreview';
 import WordPreview from '../components/previews/WordPreview';
+
+const { Title, Text } = Typography;
 
 const FilePreview = () => {
   const { fileId } = useParams();
@@ -33,7 +35,15 @@ const FilePreview = () => {
   }, [fileId]);
 
   const renderPreview = () => {
-    if (!previewData) return null;
+    if (!previewData) {
+      return (
+        <Result
+          status="warning"
+          title="预览不可用"
+          subTitle="无法加载该文件的预览内容"
+        />
+      );
+    }
 
     switch (previewData.type) {
       case 'image':
@@ -51,6 +61,34 @@ const FilePreview = () => {
     }
   };
 
+    return (
+    <div style={{ maxWidth: 1000, margin: '40px auto', padding: '0 16px' }}>
+      <Card
+        bordered={false}
+        style={{
+          borderRadius: 12,
+          boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+          padding: '16px',
+        }}
+      >
+        <div style={{ textAlign: 'center', marginBottom: 24 }}>
+          <Title level={3} style={{ margin: 0 }}>文件预览</Title>
+          <Text type="secondary">查看上传文件的内容和格式</Text>
+        </div>
+
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '50px 0' }}>
+            <Spin size="large" />
+          </div>
+        ) : (
+          renderPreview()
+        )}
+      </Card>
+    </div>
+  );
+};
+
+/*############og code#############
   return (
     <Card title="文件预览">
       {loading ? (
@@ -63,5 +101,5 @@ const FilePreview = () => {
     </Card>
   );
 };
-
+############og code#############*/
 export default FilePreview; 

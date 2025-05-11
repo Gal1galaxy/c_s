@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { Table, Card, Button, message, Space, Badge } from 'antd';
+import { Table, Card, Button, message, Space, Badge, Typography,  } from 'antd';
 import { SaveOutlined, UserOutlined } from '@ant-design/icons';
 import { io } from 'socket.io-client';
 import { useAuth } from '../contexts/AuthContext';
+
+const { Title, Text } = Typography;
 
 const FileEdit = () => {
   const { fileId } = useParams();
@@ -149,6 +151,69 @@ const FileEdit = () => {
     },
   };
 
+    return (
+      <td {...restProps}>
+        <input
+          value={value}
+          onChange={e => setValue(e.target.value)}
+          onBlur={save}
+          onKeyDown={(e) => e.key === 'Enter' && save()}
+          autoFocus
+        />
+      </td>
+    );
+  };
+
+  const components = {
+    body: {
+      cell: EditableCell,
+    },
+  };
+
+  return (
+    <div style={{ maxWidth: 1200, margin: '40px auto', padding: '0 16px' }}>
+      <Card
+        bordered={false}
+        style={{ borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+        title={
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <Title level={4} style={{ margin: 0 }}>在线协作编辑</Title>
+              <Text type="secondary">Excel 文件内容实时共享编辑</Text>
+            </div>
+            <Space>
+              <Badge count={activeUsers.length} offset={[0, 6]}>
+                <UserOutlined style={{ fontSize: 16 }} />
+              </Badge>
+              <Button
+                type="primary"
+                icon={<SaveOutlined />}
+                onClick={handleSaveFile}
+              >
+                保存
+              </Button>
+            </Space>
+          </div>
+        }
+      >
+        <div style={{ overflowX: 'auto' }}>
+          <Table
+            components={components}
+            rowClassName={() => 'editable-row'}
+            bordered
+            dataSource={data}
+            columns={columns}
+            loading={loading}
+            pagination={false}
+            scroll={{ x: true }}
+            size="small"
+          />
+        </div>
+      </Card>
+    </div>
+  );
+};
+/*################og code####################
   return (
     <Card
       title="在线编辑"
@@ -180,5 +245,6 @@ const FileEdit = () => {
     </Card>
   );
 };
+################og code####################*/
 
 export default FileEdit; 

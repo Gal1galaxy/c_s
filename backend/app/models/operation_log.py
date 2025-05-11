@@ -9,6 +9,10 @@ class OperationLog(db.Model):
     file_id = db.Column(db.Integer)  # 移除外键约束，允许为空
     operation_type = db.Column(db.String(50), nullable=False)
     operation_detail = db.Column(db.Text)
+    resource_type = db.Column(db.String(50))  # 新增
+    ip_address = db.Column(db.String(100))    # 新增
+    user_agent = db.Column(db.String(255))    # 新增
+    status = db.Column(db.String(20), default='success')  # 新增
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     def __repr__(self):

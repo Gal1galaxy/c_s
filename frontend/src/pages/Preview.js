@@ -116,7 +116,7 @@ const Preview = () => {
   return (
     <div style={{ textAlign: 'center', padding: '16px' }}>
       <img 
-        src={`data:${file.file_type};base64,${file.data}`}
+        src={`data:${file.file_type};base64,${file.content}`}
         alt={file.filename}
         style={{ 
           maxWidth: '100%',

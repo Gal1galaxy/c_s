@@ -11,7 +11,7 @@ class LogService:
         try:
             log = OperationLog(
                 user_id=request.current_user.id,
-                action=action,
+                operation_type=action,
                 resource_type=resource_type,
                 resource_id=resource_id,
                 details=details,

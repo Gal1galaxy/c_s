@@ -5,7 +5,8 @@ import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import ExcelEditor from '../components/ExcelEditor';
 import WordEditor from '../components/WordEditor';
-import axios from 'axios';
+//2025.5.11替换为下行解决首页预览编辑问题import axios from 'axios';
+import api from '../services/api';
 import PDFPreview from '../components/PDFPreview';
 import WordPreview from '../components/previews/WordPreview';
 
@@ -30,16 +31,24 @@ const Preview = () => {
       let response;
       if (shareCode) {
         // 通过分享码访问
-        response = await axios.get(`/api/files/${fileId}/content`, {
+        response = await api.get(`/api/files/${fileId}/content`, {
           params: { shareCode }
         });
+        /* 2025.5.11解决首页预览编辑跳回登录更改为上面
+        response = await axios.get(`/api/files/${fileId}/content`, {
+          params: { shareCode }
+        });  */
         console.log('File content response:', response.data);
         // 确保 response.data 包含所有必要的文件信息
         setFile(response.data);
       } else {
         // 直接访问需要先获取文件信息，再获取内容
+        const fileInfoResponse = await api.get(`/api/files/${fileId}`);
+        const fileContentResponse = await api.get(`/api/files/${fileId}/content`);
+        /*2025.5.11解决首页预览编辑跳回登录更改为上面
         const fileInfoResponse = await axios.get(`/api/files/${fileId}`);
         const fileContentResponse = await axios.get(`/api/files/${fileId}/content`);
+        */
         
         // 合并文件信息和内容
         setFile({

@@ -61,7 +61,7 @@ const FileList = () => {
   // 下载文件
   const handleDownload = async (fileId, filename) => {
     try {
-      const response = await api.get(/api/files/download/${fileId}, {
+      const response = await api.get(`/api/files/download/${fileId}`, {
         responseType: 'blob'
       });
       /* 注释掉改为上面

@@ -17,7 +17,7 @@ class LogService:
                 resource_type=resource_type,
                 file_id=resource_id,
                 operation_detail=details,
-                created_at=datetime.utcnow(),
+                created_at=datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
                 ip_address=request.remote_addr,
                 user_agent=request.user_agent.string,
                 status=status

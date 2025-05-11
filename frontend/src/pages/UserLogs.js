@@ -28,8 +28,10 @@ const UserLogs = () => {
       let url = `/api/logs/user/${user.id}/operations?page=${page}&per_page=${pageSize}`;
 
       if (filters.dateRange) {
-        url += `&start_date=${filters.dateRange[0].toISOString()}`;
-        url += `&end_date=${filters.dateRange[1].toISOString()}`;
+        const startOfDay = filters.dateRange[0].startOf('day').toDate().toISOString(); // 本地时间当天 00:00
+        const endOfDay = filters.dateRange[1].endOf('day').toDate().toISOString();     // 本地时间当天 23:59:59
+        url += `&start_date=${startOfDay}`;
+        url += `&end_date=${endOfDay}`;
       }
       if (filters.action) {
         url += `&action=${filters.action}`;

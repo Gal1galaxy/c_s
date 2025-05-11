@@ -5,6 +5,7 @@ from app.services.file_service import FileService
 from app.utils.auth import login_required
 from datetime import datetime, timedelta
 from app.models.user import User
+from app.services.log_service import LogService
 
 bp = Blueprint('shares', __name__, url_prefix='/api/shares')
 share_service = ShareService()
@@ -40,7 +41,13 @@ def create_share():
             can_write=can_write,
             expires_at=expires_at
         )
-        
+
+        LogService.log_action(
+            action='share',
+            resource_type='file',
+            resource_id=share.file_id,
+            details=f'分享文件：{share.file_id}，分享码：{share.share_code}'
+             )
         return jsonify({
             'message': '分享创建成功',
             'share': {
@@ -116,6 +123,13 @@ def revoke_share(share_id):
     try:
         user_id = get_jwt_identity()   #JWT获取user_id
         if share_service.revoke_share(share_id, user_id):
+            # 记录撤销日志
+            LogService.log_action(
+                action='delete',
+                resource_type='share',
+                resource_id=share_id,
+                details=f'撤销分享 ID: {share_id}'
+            )
             return jsonify({'message': '分享已撤销'})
         return jsonify({'error': '无权操作或分享不存在'}), 403
     except Exception as e:

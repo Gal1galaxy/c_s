@@ -234,10 +234,9 @@ const FileList = () => {
       ),
     },
   ];
-
+//###################2025.5.11前端新界面###################
   return (
     <div style={{ padding: '24px' }}>
-    //###################2025.5.11前端新界面###################
     <Card bordered={false} style={{ marginBottom: '24px' }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', padding: '8px 0' }}>
     <Title level={3} style={{ margin: 0 }}>我的文件</Title><FileUpload onSuccess={fetchFiles} /></div>
@@ -272,8 +271,10 @@ const FileList = () => {
   </Card>
 </Col>
 </Row> </Card>
-    //###################2025.5.11前端新界面###################
-    /*############初始代码############
+        {/*###################2025.5.11前端新界面###################*/}
+        {/*############初始代码############
+    return (
+    <div style={{ padding: '24px' }}>
       <Card bordered={false}>
         <Row gutter={[24, 24]}>
           <Col span={24}>
@@ -288,7 +289,7 @@ const FileList = () => {
               />
             </Card>
           </Col>
-                  ############初始代码############*/
+                  ############初始代码############*/}
           <Col xs={24} sm={12} md={8} lg={6}>
             <Card bordered={false}>
               <Statistic

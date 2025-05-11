@@ -2,11 +2,14 @@ import os
 from datetime import timedelta
 import secrets
 
+# 获取项目根目录
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
 class Config:
     # 基础配置
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'your-secret-key'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cloud_storage.db')
+        f"sqlite:///{os.path.join(BASE_DIR, 'cloud_storage.db')}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # JWT配置

@@ -28,8 +28,8 @@ const UserLogs = () => {
       let url = `/api/logs/user/${user.id}/operations?page=${page}&per_page=${pageSize}`;
 
       if (filters.dateRange) {
-        url += `&start_date=${filters.dateRange[0].format('YYYY-MM-DDTHH:mm:ss')}`;
-        url += `&end_date=${filters.dateRange[1].format('YYYY-MM-DDTHH:mm:ss')}`;
+        url += `&start_date=${filters.dateRange[0].toISOString()}`;
+        url += `&end_date=${filters.dateRange[1].toISOString()}`;
       }
       if (filters.action) {
         url += `&action=${filters.action}`;

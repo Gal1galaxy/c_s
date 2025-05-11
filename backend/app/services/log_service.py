@@ -37,7 +37,7 @@ class LogService:
         query = Log.query.filter_by(user_id=user_id)
 
         if action:
-            query = query.filter(Log.action == action)
+            query = query.filter(Log.operation_type == action)
              
         if start_date:  #筛选日期过滤
             try:

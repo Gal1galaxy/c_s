@@ -151,24 +151,6 @@ const FileEdit = () => {
     },
   };
 
-    return (
-      <td {...restProps}>
-        <input
-          value={value}
-          onChange={e => setValue(e.target.value)}
-          onBlur={save}
-          onKeyDown={(e) => e.key === 'Enter' && save()}
-          autoFocus
-        />
-      </td>
-    );
-  };
-
-  const components = {
-    body: {
-      cell: EditableCell,
-    },
-  };
 return (
     <div style={{ maxWidth: 1200, margin: '40px auto', padding: '0 16px' }}>
       <Card

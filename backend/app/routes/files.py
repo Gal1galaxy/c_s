@@ -325,10 +325,10 @@ def get_file_content(file_id):
             ##########初始代码##########'''
                 
             if not permission_service.can_read(current_user.id, file_id):
-                print(f"No read permission for user {current_user.id}")  # 调试日志
+                print(f"No read permission for user {user_id}")  # 调试日志
                 return jsonify({'error': '无权访问此文件'}), 403
                 
-            has_permission = permission_service.can_write(current_user.id, file_id)
+            has_permission = permission_service.can_write(user_id, file_id)
             print(f"Direct access permission: can_write={has_permission}")  # 调试日志
         
         file = File.query.get_or_404(file_id)

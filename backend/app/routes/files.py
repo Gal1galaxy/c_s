@@ -370,6 +370,16 @@ def get_file_content(file_id):
 def update_file_content(file_id):
     """更新文件内容"""
     try:
+        user_id = None
+        auth_header = request.headers.get('Authorization')
+        if auth_header and auth_header.startswith('Bearer '):
+            from flask_jwt_extended import decode_token
+            try:
+                token = auth_header.split(' ')[1]
+                decoded_token = decode_token(token)
+                user_id = int(decoded_token['sub'])
+            except Exception as e:
+                print(f"Token decode error: {str(e)}")
         share_code = request.args.get('shareCode')
         
         if share_code:
@@ -385,7 +395,7 @@ def update_file_content(file_id):
                 return jsonify({'error': '无编辑权限'}), 403
         else:
             # 直接访问需要验证权限
-            if not permission_service.can_write(current_user.id, file_id):
+            if not user_id or not permission_service.can_write(user_id, file_id):
                 return jsonify({'error': '无权编辑此文件'}), 403
         
         file = File.query.get_or_404(file_id)

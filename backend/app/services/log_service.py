@@ -58,9 +58,10 @@ class LogService:
             end = None
 
         # ✅ 插入调试输出
-        print("start:", start)
-        print("end:", end)
-        print("最终SQL语句：", str(query.statement.compile(compile_kwargs={'literal_binds': True})))
+        print("🕓 start_date (parsed):", start)
+        print("🕓 end_date (parsed):", end)
+        print("🔍 SQL 查询语句：", query.statement.compile(compile_kwargs={"literal_binds": True}))
+
 
         return query.order_by(Log.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
 

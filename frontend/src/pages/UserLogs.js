@@ -26,6 +26,7 @@ const UserLogs = () => {
     setLoading(true);
     try {
       let url = `/api/logs/user/${user.id}/operations?page=${page}&per_page=${pageSize}`;
+
       if (filters.dateRange) {
         url += `&start_date=${filters.dateRange[0].format('YYYY-MM-DD')}`;
         url += `&end_date=${filters.dateRange[1].format('YYYY-MM-DD')}`;
@@ -37,18 +38,19 @@ const UserLogs = () => {
       const response = await axios.get(url);
       setLogs(response.data.logs);
       setPagination({
-        ...pagination,
         current: page,
+        pageSize,
         total: response.data.total
       });
     } catch (error) {
       console.error('获取日志失败:', error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
-    fetchLogs();
+    fetchLogs(1, pagination.pageSize);
   }, [filters]);
 
   const handleTableChange = (pagination) => {
@@ -75,6 +77,7 @@ const UserLogs = () => {
           case 'delete': color = 'red'; break;
           case 'share': color = 'purple'; break;
           case 'edit': color = 'orange'; break;
+          case 'download': color = 'cyan'; break;
           default: color = 'blue';
         }
         return <Tag color={color}>{action}</Tag>;

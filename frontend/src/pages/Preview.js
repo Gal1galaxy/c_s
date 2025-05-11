@@ -100,7 +100,9 @@ const Preview = () => {
 
 
     // 如果是文本文件
-    if (file.file_type?.startsWith('text/')) {return (<div style={{ whiteSpace: 'pre-wrap', padding: '16px' }}>
+    if (file.file_type?.startsWith('text/')||
+        file.file_type?.toLowerCase() === '文本文件'
+       ) {return (<div style={{ whiteSpace: 'pre-wrap', padding: '16px' }}>
       {file.content}
     </div>
   );
@@ -108,11 +110,13 @@ const Preview = () => {
 
 
     // 如果是图片
-    if (file.file_type?.startsWith('image/')) {
+    if (file.file_type?.startsWith('image/')||
+        file.file_type?.toLowerCase() === '图片'
+       ) {
   return (
     <div style={{ textAlign: 'center', padding: '16px' }}>
       <img 
-        src={`data:${file.file_type};base64,${file.content}`}
+        src={`data:${file.file_type};base64,${file.data}`}
         alt={file.filename}
         style={{ 
           maxWidth: '100%',

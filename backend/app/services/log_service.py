@@ -1,5 +1,5 @@
 from app import db
-from app.models.log import Log
+from app.models.operation_log import OperationLog as Log
 from flask import request
 from datetime import datetime
 import json

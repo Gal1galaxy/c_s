@@ -41,13 +41,13 @@ class LogService:
              
         if start_date:  #筛选日期过滤
             try:
-                query = query.filter(text(f"datetime(created_at) >= datetime('{start_date}')"))
+                query = query.filter(Log.created_at >= start_date)
             except Exception as e:
                 print(f"start_date parse error: {e}")
 
         if end_date:
             try:
-                query = query.filter(text(f"datetime(created_at) <= datetime('{end_date}')"))
+                query = query.filter(Log.created_at <= end_date)
             except Exception as e:
                 print(f"end_date parse error: {e}")
 

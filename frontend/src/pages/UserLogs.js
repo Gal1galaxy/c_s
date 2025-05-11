@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Card, Select, DatePicker, Space, Tag } from 'antd';
+import { Table, Card, Select, DatePicker, Space, Tag, Typography } from 'antd';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import moment from 'moment';
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
+const { Title } = Typography;
 
 const UserLogs = () => {
   const { user } = useAuth();
@@ -25,8 +26,6 @@ const UserLogs = () => {
     setLoading(true);
     try {
       let url = `/api/logs/user/${user.id}/operations?page=${page}&per_page=${pageSize}`;
-      
-      // 添加筛选条件
       if (filters.dateRange) {
         url += `&start_date=${filters.dateRange[0].format('YYYY-MM-DD')}`;
         url += `&end_date=${filters.dateRange[1].format('YYYY-MM-DD')}`;
@@ -72,20 +71,11 @@ const UserLogs = () => {
       render: (action) => {
         let color = 'blue';
         switch (action) {
-          case 'upload':
-            color = 'green';
-            break;
-          case 'delete':
-            color = 'red';
-            break;
-          case 'share':
-            color = 'purple';
-            break;
-          case 'edit':
-            color = 'orange';
-            break;
-          default:
-            color = 'blue';
+          case 'upload': color = 'green'; break;
+          case 'delete': color = 'red'; break;
+          case 'share': color = 'purple'; break;
+          case 'edit': color = 'orange'; break;
+          default: color = 'blue';
         }
         return <Tag color={color}>{action}</Tag>;
       },
@@ -116,18 +106,43 @@ const UserLogs = () => {
   ];
 
   return (
-    <Card title="操作日志">
-      <Table
-        columns={columns}
-        dataSource={logs}
-        rowKey="id"
-        pagination={pagination}
-        loading={loading}
-        onChange={handleTableChange}
-        scroll={{ x: 1200 }}
-      />
-    </Card>
+    <div style={{ maxWidth: 1200, margin: '40px auto', padding: '0 16px' }}>
+      <Card
+        bordered={false}
+        style={{ borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+        title={<Title level={4} style={{ margin: 0 }}>操作日志</Title>}
+        extra={
+          <Space size="middle" wrap>
+            <RangePicker
+              onChange={(dates) => setFilters(prev => ({ ...prev, dateRange: dates }))}
+              style={{ width: 250 }}
+              placeholder={['开始日期', '结束日期']}
+            />
+            <Select
+              allowClear
+              placeholder="选择操作类型"
+              onChange={(value) => setFilters(prev => ({ ...prev, action: value }))}
+              style={{ width: 180 }}
+            >
+              {actionOptions.map(opt => (
+                <Option key={opt.value} value={opt.value}>{opt.label}</Option>
+              ))}
+            </Select>
+          </Space>
+        }
+      >
+        <Table
+          columns={columns}
+          dataSource={logs}
+          rowKey="id"
+          pagination={pagination}
+          loading={loading}
+          onChange={handleTableChange}
+          scroll={{ x: 1000 }}
+        />
+      </Card>
+    </div>
   );
 };
 
-export default UserLogs; 
+export default UserLogs;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Button, Space, Tag, Typography, message, Spin } from 'antd';
+import { Card, Button, Space, Tag, Typography, message, Spin, Divider } from 'antd';
 import { DownloadOutlined, EyeOutlined, EditOutlined } from '@ant-design/icons';
 import { shareService } from '../services/shareService';
 import { formatDate, getTimeLeft, isExpired } from '../utils/dateUtils';
@@ -98,58 +98,52 @@ const ShareView = () => {
   }
 
   return (
-    <div style={{ padding: '24px' }}>
-      <Card>
-        <Space direction="vertical" style={{ width: '100%' }}>
-          <Title level={4}>{shareInfo?.file?.filename}</Title>
-          
-          <Space wrap>
-            {shareInfo.canWrite ? (
-              <Tag color="green">可编辑</Tag>
-            ) : (
-              <Tag color="blue">只读</Tag>
-            )}
-            {shareInfo.expiresAt && (
-              <Tag color={isExpired(shareInfo.expiresAt) ? 'red' : 'orange'}>
-                {isExpired(shareInfo.expiresAt) ? '已过期' : `剩余：${getTimeLeft(shareInfo.expiresAt)}`}
-              </Tag>
-            )}
-            <Tag>{formatFileSize(shareInfo.file.file_size)}</Tag>
-          </Space>
+    <div style={{ maxWidth: 800, margin: '40px auto', padding: '0 16px' }}>
+      <Card
+        bordered={false}
+        style={{ borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+      >
+        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+          <div>
+            <Title level={4} style={{ marginBottom: 4 }}>
+              {shareInfo.file.filename}
+            </Title>
+            <Space wrap>
+              {shareInfo.canWrite ? (
+                <Tag color="green">可编辑</Tag>
+              ) : (
+                <Tag color="blue">只读</Tag>
+              )}
+              {shareInfo.expiresAt && (
+                <Tag color={isExpired(shareInfo.expiresAt) ? 'red' : 'orange'}>
+                  {isExpired(shareInfo.expiresAt) ? '已过期' : `剩余：${getTimeLeft(shareInfo.expiresAt)}`}
+                </Tag>
+              )}
+              <Tag>{formatFileSize(shareInfo.file.file_size)}</Tag>
+            </Space>
+          </div>
 
-          <Text type="secondary">
-            分享者：用户 {shareInfo.sharedBy}
-          </Text>
-          <Text type="secondary">
-            分享时间：{formatDate(shareInfo.createdAt)}
-          </Text>
+          <Divider style={{ margin: '12px 0' }} />
 
-          <Space style={{ marginTop: '16px' }}>
-            {!shareInfo.canWrite && (
-              <Button
-                type="primary"
-                icon={<EyeOutlined />}
-                onClick={handlePreview}
-              >
-              预览
+          <div>
+            <Text type="secondary">分享者：用户 {shareInfo.sharedBy}</Text><br />
+            <Text type="secondary">分享时间：{formatDate(shareInfo.createdAt)}</Text>
+          </div>
+
+          <Space style={{ marginTop: 16 }}>
+            <Button
+              type="primary"
+              icon={shareInfo.canWrite ? <EditOutlined /> : <EyeOutlined />}
+              onClick={handlePreview}
+            >
+              {shareInfo.canWrite ? '编辑' : '预览'}
             </Button>
-            )}
-            {shareInfo.canWrite && (
-              <Button
-                icon={<EditOutlined />}
-                onClick={handlePreview}
-              >
-                编辑
-              </Button>
-            )}
-            {shareInfo.canWrite && (
-              <Button
-                icon={<DownloadOutlined />}
-                onClick={handleDownload}
-              >
+            <Button
+              icon={<DownloadOutlined />}
+              onClick={handleDownload}
+            >
               下载
             </Button>
-            )}
           </Space>
         </Space>
       </Card>

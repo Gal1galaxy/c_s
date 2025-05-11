@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Space, Button, message, Card, Typography, Row, Col, Statistic } from 'antd';
 import { DeleteOutlined, DownloadOutlined, EyeOutlined, CloudUploadOutlined, FileOutlined, EditOutlined, ShareAltOutlined } from '@ant-design/icons';
-import axios from 'axios';
+//import axios from 'axios';
+import api from '../services/api'; //增加 解决首页按钮问题
 import FileUpload from '../components/FileUpload';
 import { useNavigate } from 'react-router-dom';
 import ShareFileModal from '../components/ShareFileModal';
@@ -22,7 +23,8 @@ const FileList = () => {
   const fetchFiles = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/files/list');
+      //2025.5.11注释掉，改为下行const response = await axios.get('/api/files/list');
+      const response = await api.get('/api/files/list');
       const files = response.data.owned_files;
       setFiles(files);
       
@@ -47,7 +49,8 @@ const FileList = () => {
   // 删除文件
   const handleDelete = async (fileId) => {
     try {
-      await axios.delete(`/api/files/${fileId}`);
+      //2025.5.11注释掉改为下行await axios.delete(`/api/files/${fileId}`);
+      await api.delete(/api/files/${fileId});
       message.success('文件删除成功');
       fetchFiles();
     } catch (error) {
@@ -58,9 +61,13 @@ const FileList = () => {
   // 下载文件
   const handleDownload = async (fileId, filename) => {
     try {
-      const response = await axios.get(`/api/files/download/${fileId}`, {
+      const response = await api.get(/api/files/download/${fileId}, {
         responseType: 'blob'
       });
+      /* 注释掉改为上面
+      const response = await axios.get(`/api/files/download/${fileId}`, {
+        responseType: 'blob'
+      });*/
       
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');

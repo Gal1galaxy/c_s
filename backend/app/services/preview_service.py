@@ -50,6 +50,7 @@ class PreviewService:
             img_str = base64.b64encode(buffer.getvalue()).decode()
             
             return {
+                'file_type': 'image/jpeg',
                 'type': 'image',
                 'data': img_str,
                 'width': img.width,
@@ -77,6 +78,7 @@ class PreviewService:
         with open(file_path, 'r', encoding='utf-8') as file:
             content = file.read()
             return {
+                'file_type': 'text/plain',
                 'type': 'text',
                 'content': content
             }

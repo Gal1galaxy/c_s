@@ -177,16 +177,15 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
 
         // 获取表头（列标题）来自第 0 行
         const headerRow = rows[0]?.cells || {};
-        const colKeys = Object.keys(headerRow).map(k => parseInt(k)).sort((a, b) => a - b);
-        const headers = {};
-        colKeys.forEach(colIndex => {
+        const headerKeys = Object.keys(headerRow).map(k => parseInt(k)).sort((a, b) => a - b);
+        const headerDict = {};
+        
+        headerKeys.forEach((colIndex) => {
           const cell = headerRow[colIndex];
-          if (cell?.text?.trim()) {
-            headers[colIndex] = cell.text.trim();
-          }
+          headerDict[colIndex.toString()] = cell?.text?.trim() || '';
         });
 
-        const content = [];
+        content.push(headerDict);  // ✅ 正确加入表头：key 为 '0', '1', ...，value 是列名
 
         // 从第 1 行开始提取内容，遍历数据行
         Object.keys(rows).forEach((rowIndexStr) => {
@@ -196,10 +195,10 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
           const row = rows[ri]?.cells || {};
           const rowData = {};
 
-          colKeys.forEach(colIndex => {
-            const header = headers[colIndex];
+          headerKeys.forEach((colIndex) => {
+            const headerKey = colIndex.toString();  // '0', '1', ...
             const cell = row[colIndex];
-            rowData[header] = cell?.text || '';
+            rowData[headerKey] = cell?.text || '';
           });
 
           content.push(rowData);

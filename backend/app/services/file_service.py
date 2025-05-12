@@ -468,7 +468,7 @@ class FileService:
             raise
             
    ################2025.5.12更改def——updatefilecontent################
-def update_file_content(self, file, content):
+    def update_file_content(self, file, content):
         temp_path = None
         try:
             temp_path = os.path.join(current_app.config['TEMP_FOLDER'], f'temp_{file.id}_{int(time.time())}')

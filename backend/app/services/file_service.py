@@ -439,7 +439,6 @@ class FileService:
             for sheet_name, df in df_dict.items():
                 if not df.empty:
                     headers = df.columns.tolist()
-                    final_headers = [str(h).strip() if str(h).strip() and not str(h).strip().isdigit() else f'列{i}' for i, h in enumerate(headers)]
                     print(f"✅ 读取表头：{headers}")
 
                     content[sheet_name] = [
@@ -471,30 +470,20 @@ class FileService:
             if file.file_type.endswith('spreadsheet') or file.filename.lower().endswith(('.xlsx', '.xls')):
                 try:
                     print(f"Processing Excel content: {content}")
-
-                    writer = pd.ExcelWriter(temp_path, engine='openpyxl')
+    
+                    writer = pd.ExcelWriter(temp_path, engine='openpyxl')  # 明确指定 openpyxl
                     for sheet_name, sheet_data in content.items():
                         print(f"Sheet: {sheet_name}: {sheet_data}")
-
+    
                         if len(sheet_data) > 0:
                             header_row = sheet_data[0]  # 表头
                             data = sheet_data[1:]
 
-                            # ✅ 收集所有可能的列索引（包括编辑的单元格）
-                            all_keys = set(header_row.keys())
-                            for row in data:
-                                all_keys.update(row.keys())
-                            header_keys = sorted(all_keys, key=lambda x: int(x) if x.isdigit() else x)
-
-                            # ✅ 获取每列的列名，如果 header_row 中缺失，就默认用空
-                            header_names = []
-                            for k in header_keys:
-                                v = header_row.get(k, '').strip()
-                                header_names.append(v)
-
-                            print("✅ 最终表头:", header_names)
-
-                            # ✅ 按 header_keys 顺序构造二维数组
+                            header_keys = list(header_row.keys())
+                            header_names = [header_row[k].strip() or f"列{k}" for k in header_keys]
+    
+                            print("✅ 过滤后表头:", header_names)
+    
                             rows = [
                                 [row.get(k, '') for k in header_keys]
                                 for row in data
@@ -506,24 +495,24 @@ class FileService:
                             df.to_excel(writer, sheet_name=sheet_name, index=False)
 
                             print(f"✅ Written sheet: {sheet_name} with columns: {df.columns}")
-
+    
                     writer.close()
 
                     with open(temp_path, 'rb') as f:
                         file_data = f.read()
                     print(f"Excel file size before encryption: {len(file_data)}")
-
+    
                 except Exception as e:
                     print(f"Error processing Excel file: {str(e)}")
                     raise
             else:
                 return
-
+    
             # 加密保存
             encrypted_data = self.aes.encrypt_file(file_data)
             with open(file.file_path, 'wb') as f:
                 f.write(encrypted_data)
-
+    
             file.file_size = os.path.getsize(file.file_path)
             file.updated_at = datetime.utcnow()
             if file.filename.lower().endswith(('.xlsx', '.xls')):

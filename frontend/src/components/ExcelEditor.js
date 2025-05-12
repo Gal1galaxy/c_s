@@ -177,9 +177,10 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
 
         // 获取表头（列标题）来自第 0 行
         const headerRow = rows[0]?.cells || {};
+        const colKeys = Object.keys(headerRow).map(k => parseInt(k)).sort((a, b) => a - b);
         const headers = {};
-        Object.entries(headerRow).forEach(([colIndexStr, cell]) => {
-          const colIndex = parseInt(colIndexStr, 10);
+        colKeys.forEach(colIndex => {
+          const cell = headerRow[colIndex];
           if (cell?.text?.trim()) {
             headers[colIndex] = cell.text.trim();
           }
@@ -187,15 +188,15 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
 
         const content = [];
 
-        // 从第 1 行开始提取内容
-        Object.keys(rows).forEach((rowIndex) => {
-          const ri = parseInt(rowIndex);
-          if (ri === 0) return;
+        // 从第 1 行开始提取内容，遍历数据行
+        Object.keys(rows).forEach((rowIndexStr) => {
+          const ri = parseInt(rowIndexStr, 10);
+          if (ri === 0) return;  // 跳过表头
 
-          const row = rows[rowIndex].cells || {};
+          const row = rows[ri]?.cells || {};
           const rowData = {};
 
-          Object.keys(headers).forEach((colIndex) => {
+          colKeys.forEach(colIndex => {
             const header = headers[colIndex];
             const cell = row[colIndex];
             rowData[header] = cell?.text || '';

@@ -485,24 +485,23 @@ class FileService:
                             header_row = sheet_data[0]  # 表头是 dict
                             data = sheet_data[1:]       # 剩下是数据行
     
-                            # 过滤空列名
-                            header_keys = list(header_row.keys())    
-                            header_names = [v for v in header_row.values() if v and v.strip()]  
-
-                            print("✅ 表头 keys:", header_keys)      # ✅ 新增调试
-                            print("✅ 表头 names:", header_names)    # ✅ 新增调试
+                            # 过滤空列名    
+                            header_names = [v.strip() for v in header_row.values() if v and v.strip()]
+                            print("✅ 过滤后表头:", header_names)
     
                             # 构建二维数组
                             rows = [
-                                [row.get(col_name, '') for col_name in header_names if col_name.strip()]
+                                [row.get(col_name, '') for col_name in header_names]
                                 for row in data
                             ]
     
                             # 构建 DataFrame
                             df = pd.DataFrame(rows, columns=header_names)
+                            print("✅ DataFrame:\n", df.head())
     
                             # 关闭索引写入，避免 Unnamed: 0
                             df.to_excel(writer, sheet_name=sheet_name, index=False)  # 关闭 index
+                            print(f"✅ Written sheet: {sheet_name} with columns: {df.columns}")
     
                     writer.close()
     

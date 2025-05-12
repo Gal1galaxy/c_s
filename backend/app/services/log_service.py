@@ -32,19 +32,8 @@ class LogService:
 
     @staticmethod
     def get_user_logs(user_id, page=1, per_page=20, action=None, start_date=None, end_date=None):
-        """获取用户的操作日志，支持筛选"""
+        """获取用户的操作日志"""
         query = Log.query.filter(Log.user_id == user_id)
-
-        if action:
-            query = query.filter(Log.operation_type == action)
-            
-        if start_date:  #筛选日期过滤
-                query = query.filter(Log.created_at >= start_date)
-        if end_date:
-                query = query.filter(Log.created_at <= end_date)
-
-          # 打印调试信息
-        print("📅 SQL:", query.statement.compile(compile_kwargs={"literal_binds": True}))
         return query.order_by(Log.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
 
 

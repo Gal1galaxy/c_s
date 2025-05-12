@@ -1,4 +1,4 @@
-from flask_jwt_extended import jwt_required, get_jwt   #JWT token机制
+from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity   #JWT token机制
 from flask import Blueprint, request, jsonify
 from flask_login import current_user
 from app import db

@@ -435,9 +435,10 @@ class FileService:
         """处理 Excel 文件，包括 .xlsx 和 .xls 格式"""
         try:
             content = {}
-            extension = os.path.splitext(file_path)[1].lower()
-    
-            if extension == '.xlsx':
+            # 去掉前导的 "."，以便统一判断
+            extension = os.path.splitext(file_path)[1].lower().lstrip('.')
+
+            if extension == 'xlsx':
                 # 用 pandas + openpyxl 处理 .xlsx
                 df_dict = pd.read_excel(file_path, sheet_name=None, engine='openpyxl')
                 for sheet_name, df in df_dict.items():
@@ -456,7 +457,7 @@ class FileService:
                     else:
                         content[sheet_name] = []
 
-            elif extension == '.xls':
+            elif extension == 'xls':
                 # 用 pyexcel 处理 .xls
                 book = pe.get_book(file_name=file_path)
                 for sheet in book:
@@ -485,7 +486,7 @@ class FileService:
                     content[sheet.name] = sheet_data
 
             else:
-                raise ValueError(f"不支持的 Excel 文件格式：{extension}")
+                raise ValueError(f"不支持的 Excel 文件格式：.{extension}")
 
             return {
                 'content': content,

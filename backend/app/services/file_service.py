@@ -486,8 +486,8 @@ class FileService:
                             data = sheet_data[1:]       # 剩下是数据行
     
                             # 提取列顺序
-                            col_keys = sorted(header_row.keys(), key=lambda x: int(x))
-                            col_names = [header_row[k] for k in col_keys]
+                            header_keys = list(header_row.keys())     # ['0', '1']
+                            header_names = list(header_row.values())  # ['实习地区及代码', '地区代码']
 
                             print("✅ 表头 keys:", col_keys)      # ✅ 新增调试
                             print("✅ 表头 names:", col_names)    # ✅ 新增调试
@@ -499,7 +499,7 @@ class FileService:
                             ]
     
                             # 正确构造 DataFrame 并保持列名和顺序
-                            df = pd.DataFrame(rows, columns=col_names)
+                            df = pd.DataFrame(rows, columns=header_names)
                             print("✅ DataFrame:\n", df.head())         # ✅ 新增调试
     
                             # ✅ 关键：关闭索引写入，避免 Unnamed: 0

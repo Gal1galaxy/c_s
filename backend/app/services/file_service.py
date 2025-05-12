@@ -503,11 +503,12 @@ class FileService:
                             valid_columns = [(k, name) for k, name in zip(header_keys, header_names) if name is not None]
     
                             if not valid_columns:
-                                print("⚠️ 无有效表头，跳过该工作表写入")
-                                continue
-
-                            filtered_keys = [k for k, _ in valid_columns]
-                            filtered_names = [n for _, n in valid_columns]
+                                print("⚠️ 无有效表头，将使用默认列名")
+                                filtered_keys = list(header_keys)
+                                filtered_names = [f'列{k}' for k in filtered_keys]
+                            else:
+                                filtered_keys = [k for k, _ in valid_columns]
+                                filtered_names = [n for _, n in valid_columns]
 
                             rows = [
                                 [row.get(k, '') for k in filtered_keys]

@@ -178,10 +178,10 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
         // 获取表头（列标题）来自第 0 行
         const headerRow = rows[0]?.cells || {};
         const headers = {};
-        Object.keys(headerRow).forEach((colIndex) => {
-          const headerText = headerRow[colIndex]?.text?.trim();
-          if (headerText) {
-            headers[colIndex] = headerText;
+        Object.entries(headerRow).forEach(([colIndexStr, cell]) => {
+          const colIndex = parseInt(colIndexStr, 10);
+          if (cell?.text?.trim()) {
+            headers[colIndex] = cell.text.trim();
           }
         });
 

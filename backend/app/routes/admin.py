@@ -77,6 +77,7 @@ def update_user(user_id):
 @admin_required
 def delete_user(user_id):
     """删除用户"""
+    current_user_id = get_jwt_identity()
     if user_id == current_user.id:
         return jsonify({'error': '不能删除自己的账号'}), 400
         

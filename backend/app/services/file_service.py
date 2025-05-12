@@ -430,129 +430,128 @@ class FileService:
             print(f"Error processing image file: {str(e)}")
             raise
 ################2025.5.12更改def——handle_excel_file################
-def _handle_excel_file(self, file_path):
-    """处理 Excel 文件"""
-    try:
-        df_dict = pd.read_excel(file_path, sheet_name=None, engine='openpyxl')
-        content = {}
+    def _handle_excel_file(self, file_path):
+        """处理 Excel 文件"""
+        try:
+            df_dict = pd.read_excel(file_path, sheet_name=None, engine='openpyxl')
+            content = {}
 
-        for sheet_name, df in df_dict.items():
-            if not df.empty:
-                headers = df.columns.tolist()
-                print(f"✅ 读取表头：{headers}")
+            for sheet_name, df in df_dict.items():
+                if not df.empty:
+                    headers = df.columns.tolist()
+                    print(f"✅ 读取表头：{headers}")
 
-                final_headers = [
-                    str(h).strip() if str(h).strip() and not re.match(r'^\d+$|^列\d+$', str(h).strip())
-                    else f'列{i}' for i, h in enumerate(headers)
-                ]
+                    final_headers = [
+                        str(h).strip() if str(h).strip() and not re.match(r'^\d+$|^列\d+$', str(h).strip())
+                        else f'列{i}' for i, h in enumerate(headers)
+                    ]
 
-                content[sheet_name] = [
-                    {str(i): h for i, h in enumerate(final_headers)}
-                ] + [
-                    {
-                        str(i): str(row[headers[i]]) if pd.notna(row[headers[i]]) else ''
-                        for i in range(len(headers))
-                    }
-                    for _, row in df.iterrows()
-                ]
-            else:
-                content[sheet_name] = []
+                    content[sheet_name] = [
+                        {str(i): h for i, h in enumerate(final_headers)}
+                    ] + [
+                        {
+                            str(i): str(row[headers[i]]) if pd.notna(row[headers[i]]) else ''
+                            for i in range(len(headers))
+                        }
+                        for _, row in df.iterrows()
+                    ]
+                else:
+                    content[sheet_name] = []
 
-        return {
-            'content': content,
-            'file_type': 'Excel'
-        }
+            return {
+                'content': content,
+                'file_type': 'Excel'
+            }
 
-    except Exception as e:
-        print(f"Error processing Excel file: {str(e)}")
-        raise
-
-
+        except Exception as e:
+            print(f"Error processing Excel file: {str(e)}")
+            raise
+            
    ################2025.5.12更改def——updatefilecontent################
- def update_file_content(self, file, content):
-    temp_path = None
-    try:
-        temp_path = os.path.join(current_app.config['TEMP_FOLDER'], f'temp_{file.id}_{int(time.time())}')
-        print(f"Updating content for file: {file.filename}")
+     def update_file_content(self, file, content):
+        temp_path = None
+        try:
+            temp_path = os.path.join(current_app.config['TEMP_FOLDER'], f'temp_{file.id}_{int(time.time())}')
+            print(f"Updating content for file: {file.filename}")
 
-        if file.file_type.endswith('spreadsheet') or file.filename.lower().endswith(('.xlsx', '.xls')):
-            try:
-                writer = pd.ExcelWriter(temp_path, engine='openpyxl')
-                for sheet_name, sheet_data in content.items():
-                    if len(sheet_data) > 0:
-                        header_row = sheet_data[0]
-                        data = sheet_data[1:]
+            if file.file_type.endswith('spreadsheet') or file.filename.lower().endswith(('.xlsx', '.xls')):
+                try:
+                    writer = pd.ExcelWriter(temp_path, engine='openpyxl')
+                    for sheet_name, sheet_data in content.items():
+                        if len(sheet_data) > 0:
+                            header_row = sheet_data[0]
+                            data = sheet_data[1:]
+    
+                            # 收集所有列索引（包含 header 和 data 中的所有 key）
+                            all_keys = set(header_row.keys())
+                            for row in data:
+                                all_keys.update(row.keys())
 
-                        # 收集所有列索引（包含 header 和 data 中的所有 key）
-                        all_keys = set(header_row.keys())
-                        for row in data:
-                            all_keys.update(row.keys())
+                            # 排序
+                            header_keys = sorted(all_keys, key=lambda x: int(x) if x.isdigit() else x)
 
-                        # 排序
-                        header_keys = sorted(all_keys, key=lambda x: int(x) if x.isdigit() else x)
+                            # 构造列名（如 header 中为空或为列0等无效名，则设为 None）
+                            header_names = []
+                            for k in header_keys:
+                                name = header_row.get(k, '').strip()
+                                if re.match(r'^\d+$|^列\d+$', name) or name == '':
+                                    header_names.append(None)  # 忽略该列
+                                else:
+                                    header_names.append(name)
 
-                        # 构造列名（如 header 中为空或为列0等无效名，则设为 None）
-                        header_names = []
-                        for k in header_keys:
-                            name = header_row.get(k, '').strip()
-                            if re.match(r'^\d+$|^列\d+$', name) or name == '':
-                                header_names.append(None)  # 忽略该列
-                            else:
-                                header_names.append(name)
+                            # 过滤掉 None 列
+                            valid_columns = [(k, name) for k, name in zip(header_keys, header_names) if name is not None]
+    
+                            if not valid_columns:
+                                print("⚠️ 无有效表头，跳过该工作表写入")
+                                continue
 
-                        # 过滤掉 None 列
-                        valid_columns = [(k, name) for k, name in zip(header_keys, header_names) if name is not None]
+                            filtered_keys = [k for k, _ in valid_columns]
+                            filtered_names = [n for _, n in valid_columns]
 
-                        if not valid_columns:
-                            print("⚠️ 无有效表头，跳过该工作表写入")
-                            continue
+                            rows = [
+                                [row.get(k, '') for k in filtered_keys]
+                                for row in data
+                            ]
+    
+                            df = pd.DataFrame(rows, columns=filtered_names)
+                            df.to_excel(writer, sheet_name=sheet_name, index=False)
+    
+                            print(f"✅ Written sheet: {sheet_name} with columns: {df.columns}")
+    
+                    writer.close()
+                    with open(temp_path, 'rb') as f:
+                        file_data = f.read()
+                except Exception as e:
+                    print(f"Error processing Excel file: {str(e)}")
+                    raise
+            else:
+                return
+    
+            encrypted_data = self.aes.encrypt_file(file_data)
+            with open(file.file_path, 'wb') as f:
+                f.write(encrypted_data)
 
-                        filtered_keys = [k for k, _ in valid_columns]
-                        filtered_names = [n for _, n in valid_columns]
+            file.file_size = os.path.getsize(file.file_path)
+            file.updated_at = datetime.utcnow()
+            if file.filename.lower().endswith(('.xlsx', '.xls')):
+                file.file_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
-                        rows = [
-                            [row.get(k, '') for k in filtered_keys]
-                            for row in data
-                        ]
+            db.session.commit()
+            print(f"File updated successfully: {file.filename}")
 
-                        df = pd.DataFrame(rows, columns=filtered_names)
-                        df.to_excel(writer, sheet_name=sheet_name, index=False)
+            self.log_operation(
+                user_id=file.owner_id,
+                file_id=file.id,
+                operation_type='edit',
+                operation_detail=f'编辑文件:{file.filename}'
+            )
 
-                        print(f"✅ Written sheet: {sheet_name} with columns: {df.columns}")
-
-                writer.close()
-                with open(temp_path, 'rb') as f:
-                    file_data = f.read()
-            except Exception as e:
-                print(f"Error processing Excel file: {str(e)}")
-                raise
-        else:
-            return
-
-        encrypted_data = self.aes.encrypt_file(file_data)
-        with open(file.file_path, 'wb') as f:
-            f.write(encrypted_data)
-
-        file.file_size = os.path.getsize(file.file_path)
-        file.updated_at = datetime.utcnow()
-        if file.filename.lower().endswith(('.xlsx', '.xls')):
-            file.file_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-
-        db.session.commit()
-        print(f"File updated successfully: {file.filename}")
-
-        self.log_operation(
-            user_id=file.owner_id,
-            file_id=file.id,
-            operation_type='edit',
-            operation_detail=f'编辑文件:{file.filename}'
-        )
-
-        return True
-    except Exception as e:
-        print(f"Error in update_file_content: {str(e)}")
-        db.session.rollback()
-        raise
-    finally:
-        if temp_path and os.path.exists(temp_path):
-            os.remove(temp_path)
+            return True
+        except Exception as e:
+            print(f"Error in update_file_content: {str(e)}")
+            db.session.rollback()
+            raise
+        finally:
+            if temp_path and os.path.exists(temp_path):
+                os.remove(temp_path)

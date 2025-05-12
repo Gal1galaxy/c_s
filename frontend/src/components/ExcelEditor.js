@@ -169,6 +169,9 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
       
       // 转换所有工作表的数据
       const sheetsContent = {};
+
+      // 定义 content 数组
+      const content = [];
       
       // 提取所有 sheet 内容
       Object.entries(allData).forEach(([index, sheetData]) => {

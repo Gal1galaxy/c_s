@@ -30,6 +30,9 @@ openpyxl
 python-docx
 pdf2image 
 PyMuPDF
+pyexcel
+pyexcel-xls
+
 
 # 工具
 python-dotenv

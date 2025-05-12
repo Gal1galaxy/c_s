@@ -17,21 +17,12 @@ const UserLogs = () => {
     pageSize: 20,
     total: 0
   });
-  const [filters, setFilters] = useState({
-    dateRange: null,
-    action: null
-  });
+  
 
   const fetchLogs = async (page = 1, pageSize = 20) => {
     setLoading(true);
     try {
       let url = `/api/logs/user/${user.id}/operations?page=${page}&per_page=${pageSize}`;
-
-      if (filters.dateRange) {
-        const start_date = filters.dateRange[0].startOf('day').format('YYYY-MM-DD HH:mm:ss');
-        const end_date = filters.dateRange[1].endOf('day').format('YYYY-MM-DD HH:mm:ss');
-        url += `&start_date=${encodeURIComponent(start_date)}&end_date=${encodeURIComponent(end_date)}`;
-      }
       if (filters.action) {
         url += `&action=${filters.action}`;
       }
@@ -117,11 +108,6 @@ const UserLogs = () => {
         title={<Title level={4} style={{ margin: 0 }}>操作日志</Title>}
         extra={
           <Space size="middle" wrap>
-            <RangePicker
-              onChange={(dates) => setFilters(prev => ({ ...prev, dateRange: dates }))}
-              style={{ width: 250 }}
-              placeholder={['开始日期', '结束日期']}
-            />
             <Select
               allowClear
               placeholder="选择操作类型"

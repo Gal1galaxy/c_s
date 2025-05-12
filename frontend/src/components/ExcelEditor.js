@@ -178,28 +178,37 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
         // 获取表头（列标题）来自第 0 行
         const headerRow = rows[0]?.cells || {};
         const headerKeys = Object.keys(headerRow).map(k => parseInt(k)).sort((a, b) => a - b);
+
+        // 生成列索引 -> 表头名映射
         const headerDict = {};
+        let hasRealHeader = false;
         
         headerKeys.forEach((colIndex) => {
-          const cell = headerRow[colIndex];
-          headerDict[colIndex.toString()] = cell?.text?.trim() || '';
+          const cellText = headerRow[colIndex]?.text?.trim() || '';
+          headerDict[colIndex.toString()] = cellText;
+          if (cellText !== '' && isNaN(cellText)) {
+            hasRealHeader = true; // 如果有非数字表头，视为真实表头
+          }
         });
 
         // 定义 content 数组
-        const content = [headerDict];
+        const content = [];
 
-        // 从第 1 行开始提取内容，遍历数据行
+        if (hasRealHeader) {
+          content.push(headerDict); //  只有真实表头才加入
+        }   
+
+        // 处理数据行:从第 1 行开始提取内容，遍历数据行
         Object.keys(rows).forEach((rowIndexStr) => {
           const ri = parseInt(rowIndexStr, 10);
           if (ri === 0) return;  // 跳过表头
 
           const row = rows[ri]?.cells || {};
           const rowData = {};
-
           headerKeys.forEach((colIndex) => {
-            const headerKey = colIndex.toString();  // '0', '1', ...
+            const headerKey = colIndex.toString();
             const cell = row[colIndex];
-            rowData[headerKey] = cell?.text || '';
+            rowData[headerKey] = row[colIndex]?.text || '';
           });
 
           content.push(rowData);

@@ -446,10 +446,10 @@ class FileService:
                 if not df.empty:
                     headers = df.columns.tolist()
                     content[sheet_name] = [
-                        {str(col): str(col) for col in headers}  # 表头行
+                        {str(i): col for i, col in enumerate(headers)}  # 表头行
                     ] + [
-                        {str(col): str(row[col]) if pd.notna(row[col]) else '' 
-                         for col in headers}
+                        {str(i): str(row.get(col)) if pd.notna(row.get(col)) else ''
+                         for i, col in enumerate(headers)}
                         for row in records
                     ]
                 else:

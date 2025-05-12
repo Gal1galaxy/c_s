@@ -160,80 +160,75 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
   };
 
   const handleSave = async () => {
-    try {
-      setLoading(true);
-      
-      // 获取所有工作表的数据
-      const allData = spreadsheetRef.current.getData();
-      console.log('All spreadsheet data:', allData);
-      
-      // 转换所有工作表的数据
-      const sheetsContent = {};
-      
-      // 提取所有 sheet 内容
-      Object.entries(allData).forEach(([index, sheetData]) => {
-        const sheetName = sheetData.name;
-        const rows = sheetData.rows || {};
+  try {
+    setLoading(true);
 
-        // 获取表头（列标题）来自第 0 行
-        const headerRow = rows[0]?.cells || {};
-        const headerKeys = Object.keys(headerRow).map(k => parseInt(k)).sort((a, b) => a - b);
+    const allData = spreadsheetRef.current.getData();
+    console.log('All spreadsheet data:', allData);
 
-        // 生成列索引 -> 表头名映射
-        const headerDict = {};
-        let hasRealHeader = false;
-        
-        headerKeys.forEach((colIndex) => {
-          const cellText = headerRow[colIndex]?.text?.trim() || '';
-          headerDict[colIndex.toString()] = cellText;
-          if (cellText !== '' && isNaN(cellText)) {
-            hasRealHeader = true; // 如果有非数字表头，视为真实表头
-          }
-        });
+    const sheetsContent = {};
 
-        // 定义 content 数组
-        const content = [];
+    Object.entries(allData).forEach(([index, sheetData]) => {
+      const sheetName = sheetData.name;
+      const rows = sheetData.rows || {};
 
-        if (hasRealHeader) {
-          content.push(headerDict); //  只有真实表头才加入
-        }   
+      const headerRow = rows[0]?.cells || {};
+      const headerDict = {};
+      const headerKeys = [];
 
-        // 处理数据行:从第 1 行开始提取内容，遍历数据行
-        Object.keys(rows).forEach((rowIndexStr) => {
-          const ri = parseInt(rowIndexStr, 10);
-          if (ri === 0) return;  // 跳过表头
-
-          const row = rows[ri]?.cells || {};
-          const rowData = {};
-          headerKeys.forEach((colIndex) => {
-            const headerKey = colIndex.toString();
-            const cell = row[colIndex];
-            rowData[headerKey] = row[colIndex]?.text || '';
-          });
-
-          content.push(rowData);
-        });
-
-        sheetsContent[sheetName] = content;
+      // ✅ 仅保留非空且不为纯数字、不为“列+数字”的表头
+      Object.entries(headerRow).forEach(([colKey, cell]) => {
+        const value = cell?.text?.trim() || '';
+        if (value && !/^\d+$/.test(value) && !/^列\d+$/.test(value)) {
+          headerDict[colKey] = value;
+          headerKeys.push(parseInt(colKey));
+        }
       });
-      
-      console.log('Saving content:', sheetsContent);
-      
-      const response = await axios.post(
-        `/api/files/${fileId}/content${shareCode ? `?shareCode=${shareCode}` : ''}`,
-        sheetsContent
-      );
-      
-      if (response.data.message) {
-        message.success('保存成功');
+
+      const content = [];
+
+      // ✅ 只有存在有效表头时才加入表头
+      if (Object.keys(headerDict).length > 0) {
+        content.push(headerDict);
       }
-    } catch (error) {
-      console.error('Error saving file:', error);
-      message.error(error.response?.data?.error || '保存失败');
-    } finally {
-      setLoading(false);
+
+      // ✅ 提取数据行
+      Object.keys(rows).forEach((rowIndexStr) => {
+        const ri = parseInt(rowIndexStr, 10);
+        if (ri === 0) return;
+
+        const row = rows[ri]?.cells || {};
+        const rowData = {};
+
+        headerKeys.forEach((colIndex) => {
+          const colKey = colIndex.toString();
+          rowData[colKey] = row[colIndex]?.text || '';
+        });
+
+        content.push(rowData);
+      });
+
+      sheetsContent[sheetName] = content;
+    });
+
+    console.log('Saving content:', sheetsContent);
+
+    const response = await axios.post(
+      `/api/files/${fileId}/content${shareCode ? `?shareCode=${shareCode}` : ''}`,
+      sheetsContent
+    );
+
+    if (response.data.message) {
+      message.success('保存成功');
     }
-  };
+  } catch (error) {
+    console.error('Error saving file:', error);
+    message.error(error.response?.data?.error || '保存失败');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // 添加单元格编辑处理函数
   const handleCellEditStart = (row, col) => {

@@ -438,7 +438,7 @@ class FileService:
 
             for sheet_name, df in df_dict.items():
                 if not df.empty:
-                    headers = df.columns.tolist()
+                    final_headers = [str(h).strip() if str(h).strip() and not str(h).strip().isdigit() else f'列{i}' for i, h in enumerate(headers)]
                     print(f"✅ 读取表头：{headers}")
 
                     content[sheet_name] = [

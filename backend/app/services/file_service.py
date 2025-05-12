@@ -485,8 +485,11 @@ class FileService:
                         
                         # 跳过第一行（标题行）
                         if len(sheet_data) > 0:
-                            headers = sheet_data[0].keys()
+                            header_row = sheet_data[0]
+                            headers = list(header_row.values())  # 正确的列名
                             data = sheet_data[1:]  # 只取数据行
+                            df = pd.DataFrame(data, columns=header_row.keys())
+                            df.columns = headers  # 替换为真正的列名
                             
                             # 创建 DataFrame，使用原始标题
                             df = pd.DataFrame(data, columns=headers)

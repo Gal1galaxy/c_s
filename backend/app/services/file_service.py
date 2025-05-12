@@ -429,75 +429,86 @@ class FileService:
         except Exception as e:
             print(f"Error processing image file: {str(e)}")
             raise
-################2025.5.12更改def——handle_excel_file################
+
     def _handle_excel_file(self, file_path):
         """处理 Excel 文件"""
         try:
-            df_dict = pd.read_excel(file_path, sheet_name=None, engine='openpyxl')  # 明确指定引擎
+            # 读取 Excel 文件
+            df_dict = pd.read_excel(file_path, sheet_name=None)
             content = {}
-
+            
+            # 处理每个工作表
             for sheet_name, df in df_dict.items():
+                # 将 DataFrame 转换为字典列表
+                records = df.to_dict('records')
+                
+                # 如果有数据，添加表头作为第一行
                 if not df.empty:
                     headers = df.columns.tolist()
-                    print(f"✅ 读取表头：{headers}")
-
                     content[sheet_name] = [
-                        {str(i): h for i, h in enumerate(headers)}  # 表头行
+                        {str(col): str(col) for col in headers}  # 表头行
                     ] + [
-                        {str(i): str(row[h]) if pd.notna(row[h]) else '' for i, h in enumerate(headers)}
-                        for _, row in df.iterrows()
+                        {str(col): str(row[col]) if pd.notna(row[col]) else '' 
+                         for col in headers}
+                        for row in records
                     ]
                 else:
                     content[sheet_name] = []
-    
+            
             return {
                 'content': content,
                 'file_type': 'Excel'
             }
-
+            
         except Exception as e:
             print(f"Error processing Excel file: {str(e)}")
             raise
-
    ################2025.5.12更改def——updatefilecontent################
     def update_file_content(self, file, content):
         """更新文件内容"""
         temp_path = None
         try:
-            temp_path = os.path.join(current_app.config['TEMP_FOLDER'], f'temp_{file.id}_{int(time.time())}')
-            print(f"Updating content for file: {file.filename}")
+            temp_path = os.path.join(current_app.config['TEMP_FOLDER'], 
+                                     f'temp_{file.id}_{int(time.time())}')
+        
+            print(f"Updating content for file: {file.filename}")  # 调试日志
 
             if file.file_type.endswith('spreadsheet') or file.filename.lower().endswith(('.xlsx', '.xls')):
                 try:
-                    print(f"Processing Excel content: {content}")
-    
-                    writer = pd.ExcelWriter(temp_path, engine='openpyxl')  # 明确指定 openpyxl
+                    print(f"Processing Excel content: {content}")  # 调试日志
+
+                    writer = pd.ExcelWriter(temp_path, engine='openpyxl')
                     for sheet_name, sheet_data in content.items():
-                        print(f"Sheet: {sheet_name}: {sheet_data}")
+                        print(f"Sheet: {sheet_name}: {sheet_data}")  # 调试日志
     
                         if len(sheet_data) > 0:
-                            header_row = sheet_data[0]  # 表头
-                            data = sheet_data[1:]
+                            header_row = sheet_data[0]  # 表头是 dict
+                            data = sheet_data[1:]       # 剩下是数据行
+    
+                            # 提取列顺序
+                            header_keys = list(header_row.keys())     # ['0', '1']
+                            header_names = list(header_row.values())  # ['实习地区及代码', '地区代码']
 
-                            header_keys = list(header_row.keys())
-                            header_names = [header_row[k].strip() or f"列{k}" for k in header_keys]
+                            print("✅ 表头 keys:", col_keys)      # ✅ 新增调试
+                            print("✅ 表头 names:", col_names)    # ✅ 新增调试
     
-                            print("✅ 过滤后表头:", header_names)
-    
+                            # 构建二维数组
                             rows = [
-                                [row.get(k, '') for k in header_keys]
+                                [row.get(header_names[i], '') for i in range(len(header_keys))]
                                 for row in data
                             ]
-
+    
+                            # 正确构造 DataFrame 并保持列名和顺序
                             df = pd.DataFrame(rows, columns=header_names)
-                            print("✅ DataFrame:\n", df.head())
-
-                            df.to_excel(writer, sheet_name=sheet_name, index=False)
-
-                            print(f"✅ Written sheet: {sheet_name} with columns: {df.columns}")
+                            print("✅ DataFrame:\n", df.head())         # ✅ 新增调试
+    
+                            # ✅ 关键：关闭索引写入，避免 Unnamed: 0
+                            df.to_excel(writer, sheet_name=sheet_name, index=False)  # 关闭 index
+    
+                            print(f"✅ Written sheet: {sheet_name} with columns: {df.columns}")  # ✅ 调试
     
                     writer.close()
-
+    
                     with open(temp_path, 'rb') as f:
                         file_data = f.read()
                     print(f"Excel file size before encryption: {len(file_data)}")
@@ -506,13 +517,15 @@ class FileService:
                     print(f"Error processing Excel file: {str(e)}")
                     raise
             else:
+                # 其他格式处理略（略去以简洁）
                 return
-    
+
             # 加密保存
             encrypted_data = self.aes.encrypt_file(file_data)
             with open(file.file_path, 'wb') as f:
                 f.write(encrypted_data)
-    
+
+            # 更新文件记录
             file.file_size = os.path.getsize(file.file_path)
             file.updated_at = datetime.utcnow()
             if file.filename.lower().endswith(('.xlsx', '.xls')):
@@ -521,6 +534,7 @@ class FileService:
             db.session.commit()
             print(f"File updated successfully: {file.filename}")
 
+            # 日志
             self.log_operation(
                 user_id=file.owner_id,
                 file_id=file.id,

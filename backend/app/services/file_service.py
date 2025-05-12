@@ -433,31 +433,24 @@ class FileService:
     def _handle_excel_file(self, file_path):
         """处理 Excel 文件"""
         try:
-            df_dict = pd.read_excel(file_path, sheet_name=None, engine='openpyxl')
+            df_dict = pd.read_excel(file_path, sheet_name=None, engine='openpyxl')  # 明确指定引擎
             content = {}
 
             for sheet_name, df in df_dict.items():
                 if not df.empty:
                     headers = df.columns.tolist()
+                    final_headers = [str(h).strip() if str(h).strip() and not str(h).strip().isdigit() else f'列{i}' for i, h in enumerate(headers)]
                     print(f"✅ 读取表头：{headers}")
 
-                    final_headers = [
-                        str(h).strip() if str(h).strip() and not re.match(r'^\d+$|^列\d+$', str(h).strip())
-                        else f'列{i}' for i, h in enumerate(headers)
-                    ]
-
                     content[sheet_name] = [
-                        {str(i): h for i, h in enumerate(final_headers)}
+                        {str(i): h for i, h in enumerate(headers)}  # 表头行
                     ] + [
-                        {
-                            str(i): str(row[headers[i]]) if pd.notna(row[headers[i]]) else ''
-                            for i in range(len(headers))
-                        }
+                        {str(i): str(row[h]) if pd.notna(row[h]) else '' for i, h in enumerate(headers)}
                         for _, row in df.iterrows()
                     ]
                 else:
                     content[sheet_name] = []
-
+    
             return {
                 'content': content,
                 'file_type': 'Excel'
@@ -466,9 +459,10 @@ class FileService:
         except Exception as e:
             print(f"Error processing Excel file: {str(e)}")
             raise
-            
+
    ################2025.5.12更改def——updatefilecontent################
     def update_file_content(self, file, content):
+        """更新文件内容"""
         temp_path = None
         try:
             temp_path = os.path.join(current_app.config['TEMP_FOLDER'], f'temp_{file.id}_{int(time.time())}')
@@ -476,59 +470,56 @@ class FileService:
 
             if file.file_type.endswith('spreadsheet') or file.filename.lower().endswith(('.xlsx', '.xls')):
                 try:
+                    print(f"Processing Excel content: {content}")
+
                     writer = pd.ExcelWriter(temp_path, engine='openpyxl')
                     for sheet_name, sheet_data in content.items():
+                        print(f"Sheet: {sheet_name}: {sheet_data}")
+
                         if len(sheet_data) > 0:
-                            header_row = sheet_data[0]
+                            header_row = sheet_data[0]  # 表头
                             data = sheet_data[1:]
-    
-                            # 收集所有列索引（包含 header 和 data 中的所有 key）
+
+                            # ✅ 收集所有可能的列索引（包括编辑的单元格）
                             all_keys = set(header_row.keys())
                             for row in data:
                                 all_keys.update(row.keys())
-
-                            # 排序
                             header_keys = sorted(all_keys, key=lambda x: int(x) if x.isdigit() else x)
 
-                            # 构造列名（如 header 中为空或为列0等无效名，则设为 None）
+                            # ✅ 获取每列的列名，如果 header_row 中缺失，就默认用空
                             header_names = []
                             for k in header_keys:
-                                name = header_row.get(k, '').strip()
-                                if re.match(r'^\d+$|^列\d+$', name) or name == '':
-                                    header_names.append(None)  # 忽略该列
-                                else:
-                                    header_names.append(name)
+                                v = header_row.get(k, '').strip()
+                                header_names.append(v)
 
-                            # 过滤掉 None 列
-                            valid_columns = [(k, name) for k, name in zip(header_keys, header_names) if name is not None]
-    
-                            if not valid_columns:
-                                print("⚠️ 无有效表头，将使用默认列名")
-                                filtered_keys = list(header_keys)
-                                filtered_names = [f'列{k}' for k in filtered_keys]
-                            else:
-                                filtered_keys = [k for k, _ in valid_columns]
-                                filtered_names = [n for _, n in valid_columns]
+                            print("✅ 最终表头:", header_names)
 
+                            # ✅ 按 header_keys 顺序构造二维数组
                             rows = [
-                                [row.get(k, '') for k in filtered_keys]
+                                [row.get(k, '') for k in header_keys]
                                 for row in data
                             ]
-    
-                            df = pd.DataFrame(rows, columns=filtered_names)
+
+                            df = pd.DataFrame(rows, columns=header_names)
+                            print("✅ DataFrame:\n", df.head())
+
                             df.to_excel(writer, sheet_name=sheet_name, index=False)
-    
+
                             print(f"✅ Written sheet: {sheet_name} with columns: {df.columns}")
-    
+
                     writer.close()
+
                     with open(temp_path, 'rb') as f:
                         file_data = f.read()
+                    print(f"Excel file size before encryption: {len(file_data)}")
+
                 except Exception as e:
                     print(f"Error processing Excel file: {str(e)}")
                     raise
             else:
                 return
-    
+
+            # 加密保存
             encrypted_data = self.aes.encrypt_file(file_data)
             with open(file.file_path, 'wb') as f:
                 f.write(encrypted_data)
@@ -549,6 +540,7 @@ class FileService:
             )
 
             return True
+
         except Exception as e:
             print(f"Error in update_file_content: {str(e)}")
             db.session.rollback()

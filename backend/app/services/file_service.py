@@ -486,22 +486,26 @@ class FileService:
                             data = sheet_data[1:]       # 剩下是数据行
     
                             # 提取列顺序
-                            col_keys = list(header_row.keys())
-                            col_names = list(header_row.values())
+                            col_keys = sorted(header_row.keys(), key=lambda x: int(x))
+                            col_names = [header_row[k] for k in col_keys]
+
+                            print("✅ 表头 keys:", col_keys)      # ✅ 新增调试
+                            print("✅ 表头 names:", col_names)    # ✅ 新增调试
     
                             # 构建二维数组
                             rows = [
-                                [row.get(col_key, '') for col_key in col_keys]
+                                [row.get(k, '') for k in col_keys]
                                 for row in data
                             ]
     
                             # 正确构造 DataFrame 并保持列名和顺序
                             df = pd.DataFrame(rows, columns=col_names)
+                            print("✅ DataFrame:\n", df.head())         # ✅ 新增调试
     
                             # ✅ 关键：关闭索引写入，避免 Unnamed: 0
-                            df.to_excel(writer, sheet_name=sheet_name, index=False)
+                            df.to_excel(writer, sheet_name=sheet_name, index=False)  # 关闭 index
     
-                            print(f"Written sheet: {sheet_name} -> columns: {df.columns}")  # 调试日志
+                            print(f"✅ Written sheet: {sheet_name} with columns: {df.columns}")  # ✅ 调试
     
                     writer.close()
     

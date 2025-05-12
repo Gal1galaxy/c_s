@@ -475,34 +475,34 @@ class FileService:
             
             # Excel 文件处理
             if file.file_type.endswith('spreadsheet') or file.filename.lower().endswith(('.xlsx', '.xls')):
-            try:
-                print(f"Processing Excel content: {content}")  # 调试日志
+                try:
+                    print(f"Processing Excel content: {content}")  # 调试日志
                 
-                writer = pd.ExcelWriter(temp_path, engine='openpyxl')
-                for sheet_name, sheet_data in content.items():
-                    print(f"Sheet: {sheet_name}: {sheet_data}")  # 调试日志
+                    writer = pd.ExcelWriter(temp_path, engine='openpyxl')
+                    for sheet_name, sheet_data in content.items():
+                        print(f"Sheet: {sheet_name}: {sheet_data}")  # 调试日志
 
-                    if len(sheet_data) > 0:
-                        header_row = sheet_data[0]  # 第一行是表头的 dict，如 {'0': '名称', '1': '代码'}
-                        data = sheet_data[1:]       # 其余是数据行
+                        if len(sheet_data) > 0:
+                            header_row = sheet_data[0]  # 第一行是表头的 dict，如 {'0': '名称', '1': '代码'}
+                            data = sheet_data[1:]       # 其余是数据行
 
-                        # 使用 header_row 的值作为列名
-                        columns = list(header_row.values())
-                        print("列名 columns:", columns)
+                            # 使用 header_row 的值作为列名
+                            columns = list(header_row.values())
+                            print("列名 columns:", columns)
 
-                        # 构造二维数组 [[val1, val2], [val1, val2], ...] 保持列顺序
-                        rows = [
-                            [row.get(col_key, '') for col_key in header_row.keys()]
-                            for row in data
-                        ]
+                            # 构造二维数组 [[val1, val2], [val1, val2], ...] 保持列顺序
+                            rows = [
+                                [row.get(col_key, '') for col_key in header_row.keys()]
+                                for row in data
+                            ]
 
-                        # 构造 DataFrame
-                        df = pd.DataFrame(rows, columns=columns)
-                        df.to_excel(writer, sheet_name=sheet_name, index=False)
+                            # 构造 DataFrame
+                            df = pd.DataFrame(rows, columns=columns)
+                            df.to_excel(writer, sheet_name=sheet_name, index=False)
                             
-                        #print(f"Sheet data: {df}")  # 调试日志
-                        #print(f"Sheet data type: {type(df)}")  # 调试日志
-                        #print(f"Sheet data columns: {df.columns}")  # 调试日志
+                            #print(f"Sheet data: {df}")  # 调试日志
+                            #print(f"Sheet data type: {type(df)}")  # 调试日志
+                            #print(f"Sheet data columns: {df.columns}")  # 调试日志
                     
                     # 确保写入所有数据并关闭文件
                     writer.close()

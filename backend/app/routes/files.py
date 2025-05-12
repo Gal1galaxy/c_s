@@ -201,7 +201,7 @@ def preview_file(file_id):
             if share.is_expired:
                 return jsonify({'error': '分享已过期'}), 403
             # 检查是否私人分享
-            if share.shared_with is not None and user_id not in [share.owner_id, share.shared_with]:
+            if share.shared_with is not None and user_id not in [share.shared_by, share.shared_with]:
                 return jsonify({'error': '没有权限访问此分享'}), 403
         else:
             # 直接访问需要验证权限
@@ -303,7 +303,7 @@ def get_file_content(file_id):
             print(f"Share info: {share}")  # 调试日志
             
             # 检查是否私人定向分享，且用户是目标用户或分享者本人
-            if share.shared_with is not None and user_id not in [share.owner_id, share.shared_with]:
+            if share.shared_with is not None and user_id not in [share.shared_by, share.shared_with]:
                 print(f"User {user_id} has no access to this private share")  # 调试日志
                 return jsonify({'error': '没有权限访问此分享'}), 403
             if not share:
@@ -396,7 +396,7 @@ def update_file_content(file_id):
                 return jsonify({'error': '分享已过期'}), 403
 
             # ✅ 新增：允许分享创建者和被分享人
-            if share.shared_with is not None and user_id not in [share.owner_id, share.shared_with]:
+            if share.shared_with is not None and user_id not in [share.shared_by, share.shared_with]:
                 return jsonify({'error': '没有权限访问此分享'}), 403
                 
             if not share.can_write:

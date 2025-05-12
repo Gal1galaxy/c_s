@@ -302,6 +302,10 @@ def get_file_content(file_id):
             share = share_service.get_share_by_code(share_code)
             print(f"Share info: {share}")  # 调试日志
             
+            # 检查是否私人定向分享，且用户是目标用户或分享者本人
+            if share.shared_with is not None and user_id not in [share.owner_id, share.shared_with]:
+                print(f"User {user_id} has no access to this private share")  # 调试日志
+                return jsonify({'error': '没有权限访问此分享'}), 403
             if not share:
                 print("Share not found")  # 调试日志
                 return jsonify({'error': '分享不存在或已过期'}), 404

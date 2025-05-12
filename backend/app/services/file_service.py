@@ -435,9 +435,9 @@ class FileService:
         """处理 Excel 文件，包括 .xlsx 和 .xls 格式"""
         try:
             content = {}
-            extension = file_path.lower().split('.')[-1]
+            extension = os.path.splitext(file_path)[1].lower()
     
-            if extension == 'xlsx':
+            if extension == '.xlsx':
                 # 用 pandas + openpyxl 处理 .xlsx
                 df_dict = pd.read_excel(file_path, sheet_name=None, engine='openpyxl')
                 for sheet_name, df in df_dict.items():

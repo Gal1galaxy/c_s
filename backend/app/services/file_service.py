@@ -501,7 +501,7 @@ class FileService:
         """更新文件内容"""
         temp_path = None
         try:
-            temp_path = os.path.join(current_app.config['TEMP_FOLDER'], f'temp_{file.id}_{int(time.time())}')
+            temp_path = os.path.join(current_app.config['TEMP_FOLDER'], f'temp_{file.id}_{int(time.time())}.xlsx')
             print(f"Updating content for file: {file.filename}")
 
             if file.file_type.endswith('spreadsheet') or file.filename.lower().endswith(('.xlsx', '.xls')):

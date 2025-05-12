@@ -1,3 +1,4 @@
+import os
 from werkzeug.utils import secure_filename
 from app import db
 from app.models.file import File

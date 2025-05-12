@@ -394,6 +394,10 @@ def update_file_content(file_id):
                 
             if share.is_expired:
                 return jsonify({'error': '分享已过期'}), 403
+
+            # ✅ 新增：允许分享创建者和被分享人
+            if share.shared_with is not None and user_id not in [share.owner_id, share.shared_with]:
+                return jsonify({'error': '没有权限访问此分享'}), 403
                 
             if not share.can_write:
                 return jsonify({'error': '无编辑权限'}), 403

@@ -155,7 +155,7 @@ def get_share_info(share_code):
             except Exception:
                 current_user_id = None
 
-            if current_user_id is None or int(current_user_id) != int(share.shared_with):
+            if current_user_id is None or int(current_user_id) not in [int(share.shared_with), int(share.shared_by)]:
                 return jsonify({'error': '没有权限访问此分享'}), 403
 
         # 打印返回的数据

@@ -485,7 +485,7 @@ class FileService:
                     content[sheet.name] = sheet_data
 
             else:
-                raise ValueError(f"不支持的 Excel 文件格式：.{extension}")
+                raise ValueError(f"不支持的 Excel 文件格式：{extension}")
 
             return {
                 'content': content,

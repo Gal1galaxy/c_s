@@ -456,7 +456,7 @@ class FileService:
                     else:
                         content[sheet_name] = []
 
-            elif extension == 'xls':
+            elif extension == '.xls':
                 # 用 pyexcel 处理 .xls
                 book = pe.get_book(file_name=file_path)
                 for sheet in book:

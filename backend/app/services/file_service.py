@@ -433,24 +433,31 @@ class FileService:
     def _handle_excel_file(self, file_path):
         """处理 Excel 文件"""
         try:
-            df_dict = pd.read_excel(file_path, sheet_name=None, engine='openpyxl')  # 明确指定引擎
+            df_dict = pd.read_excel(file_path, sheet_name=None, engine='openpyxl')
             content = {}
 
             for sheet_name, df in df_dict.items():
                 if not df.empty:
                     headers = df.columns.tolist()
-                    final_headers = [str(h).strip() if str(h).strip() and not str(h).strip().isdigit() else f'列{i}' for i, h in enumerate(headers)]
                     print(f"✅ 读取表头：{headers}")
 
+                    final_headers = [
+                        str(h).strip() if str(h).strip() and not str(h).strip().isdigit()
+                        else f'列{i}' for i, h in enumerate(headers)
+                    ]
+
                     content[sheet_name] = [
-                        {str(i): h for i, h in enumerate(headers)}  # 表头行
+                        {str(i): h for i, h in enumerate(final_headers)}  # 表头行
                     ] + [
-                        {str(i): str(row[h]) if pd.notna(row[h]) else '' for i, h in enumerate(headers)}
+                        {
+                            str(i): str(row[headers[i]]) if pd.notna(row[headers[i]]) else ''
+                            for i in range(len(headers))
+                        }
                         for _, row in df.iterrows()
                     ]
                 else:
                     content[sheet_name] = []
-    
+
             return {
                 'content': content,
                 'file_type': 'Excel'
@@ -459,6 +466,7 @@ class FileService:
         except Exception as e:
             print(f"Error processing Excel file: {str(e)}")
             raise
+
 
    ################2025.5.12更改def——updatefilecontent################
     def update_file_content(self, file, content):

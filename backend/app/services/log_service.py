@@ -34,6 +34,8 @@ class LogService:
     def get_user_logs(user_id, page=1, per_page=20, action=None, start_date=None, end_date=None):
         """获取用户的操作日志"""
         query = Log.query.filter(Log.user_id == user_id)
+        if action:
+            query = query.filter(Log.operation_type == action)
         return query.order_by(Log.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
 
 

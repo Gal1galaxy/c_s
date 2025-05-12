@@ -485,27 +485,24 @@ class FileService:
                             header_row = sheet_data[0]  # 表头是 dict
                             data = sheet_data[1:]       # 剩下是数据行
     
-                            # 提取列顺序
-                            header_keys = list(header_row.keys())     # ['0', '1']
-                            header_names = list(header_row.values())  # ['实习地区及代码', '地区代码']
+                            # 过滤空列名
+                            header_keys = list(header_row.keys())    
+                            header_names = [v for v in header_row.values() if v and v.strip()]  
 
-                            print("✅ 表头 keys:", col_keys)      # ✅ 新增调试
-                            print("✅ 表头 names:", col_names)    # ✅ 新增调试
+                            print("✅ 表头 keys:", header_keys)      # ✅ 新增调试
+                            print("✅ 表头 names:", header_names)    # ✅ 新增调试
     
                             # 构建二维数组
                             rows = [
-                                [row.get(header_names[i], '') for i in range(len(header_keys))]
+                                [row.get(col_name, '') for col_name in header_names if col_name.strip()]
                                 for row in data
                             ]
     
-                            # 正确构造 DataFrame 并保持列名和顺序
+                            # 构建 DataFrame
                             df = pd.DataFrame(rows, columns=header_names)
-                            print("✅ DataFrame:\n", df.head())         # ✅ 新增调试
     
-                            # ✅ 关键：关闭索引写入，避免 Unnamed: 0
+                            # 关闭索引写入，避免 Unnamed: 0
                             df.to_excel(writer, sheet_name=sheet_name, index=False)  # 关闭 index
-    
-                            print(f"✅ Written sheet: {sheet_name} with columns: {df.columns}")  # ✅ 调试
     
                     writer.close()
     

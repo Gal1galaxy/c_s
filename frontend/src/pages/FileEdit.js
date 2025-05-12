@@ -4,6 +4,8 @@ import { Table, Card, Button, message, Space, Badge, Typography,  } from 'antd';
 import { SaveOutlined, UserOutlined } from '@ant-design/icons';
 import { io } from 'socket.io-client';
 import { useAuth } from '../contexts/AuthContext';
+import { Avatar } from 'antd';
+
 
 const { Title, Text } = Typography;
 
@@ -77,6 +79,37 @@ const FileEdit = () => {
       }
     };
   }, [fileId, user.id]);
+
+  // 渲染前5位用户头像，+N展示
+  const renderUserList = () => {
+    const maxUsersToShow = 5;
+    const visibleUsers = activeUsers.slice(0, maxUsersToShow);
+    const remaining = activeUsers.length - visibleUsers.length;
+
+    const getColor = (id) => {
+      const colors = ['#f56a00', '#7265e6', '#ffbf00', '#00a2ae', '#1890ff'];
+      return colors[id % colors.length];
+    };
+
+  return (
+    <Space size="small">
+      {visibleUsers.map((uid) => (
+        <Avatar
+          key={uid}
+          style={{ backgroundColor: getColor(uid), verticalAlign: 'middle' }}
+          size="small"
+        >
+          {String(uid)[0]}
+        </Avatar>
+      ))}
+      {remaining > 0 && (
+        <Text type="secondary" style={{ fontSize: 12 }}>
+          +{remaining} 
+        </Text>
+      )}
+    </Space>
+   );
+  };
 
   // 处理单元格编辑
   const handleSave = useCallback((row, col, value) => {
@@ -164,7 +197,10 @@ return (
             </div>
             <Space>
               <Badge count={activeUsers.length} offset={[0, 6]}>
+                <Space>
                 <UserOutlined style={{ fontSize: 16 }} />
+                {renderUserList()}
+               </Space>
               </Badge>
               <Button
                 type="primary"

@@ -24,7 +24,7 @@ const UserLogs = () => {
     try {
       let url = `/api/logs/user/${user.id}/operations?page=${page}&per_page=${pageSize}`;
       if (actionFilter) {
-        url += `&action=${filters.action}`;
+        url += `&action=${actionFilter}`;
       }
 
       const response = await axios.get(url);

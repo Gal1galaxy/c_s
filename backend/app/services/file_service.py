@@ -489,8 +489,8 @@ class FileService:
                             header_keys = list(header_row.keys())     # ['0', '1']
                             header_names = list(header_row.values())  # ['实习地区及代码', '地区代码']
 
-                            print("✅ 表头 keys:", col_keys)      # ✅ 新增调试
-                            print("✅ 表头 names:", col_names)    # ✅ 新增调试
+                            print("✅ 表头 keys:", header_keys)      # ✅ 新增调试
+                            print("✅ 表头 names:", header_names)    # ✅ 新增调试
     
                             # 构建二维数组
                             rows = [

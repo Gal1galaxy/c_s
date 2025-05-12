@@ -184,7 +184,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
         // 转换数据行
         const content = [];
         Object.keys(rows).forEach((rowIndex, index) => {
-          //if (index === 0) return; // 跳过标题行
+          if (index === 0) return; // 跳过标题行
           
           const row = rows[rowIndex].cells || {};
           const rowData = {};

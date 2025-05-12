@@ -201,7 +201,7 @@ def preview_file(file_id):
             if share.is_expired:
                 return jsonify({'error': '分享已过期'}), 403
             # 检查是否私人分享
-            if share.shared_with is not None and user_id != share.shared_with:
+            if share.shared_with is not None and user_id not in [share.owner_id, share.shared_with]:
                 return jsonify({'error': '没有权限访问此分享'}), 403
         else:
             # 直接访问需要验证权限

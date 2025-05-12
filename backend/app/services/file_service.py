@@ -483,11 +483,23 @@ class FileService:
                             header_names = [header_row[k].strip() or f"列{k}" for k in header_keys]
     
                             print("✅ 过滤后表头:", header_names)
+
+                            # ✅ 获取所有列索引，不只是来自 header_row，还包括所有数据行
+                            all_keys = set(header_row.keys())
+                            for row in data:
+                                all_keys.update(row.keys())
+                            header_keys = sorted(all_keys, key=lambda x: int(x) if x.isdigit() else x)
+                            
+                            # ✅ 构造列名列表
+                            header_names = [header_row.get(k, '').strip() or f'列{k}' for k in header_keys]
     
                             rows = [
                                 [row.get(k, '') for k in header_keys]
                                 for row in data
                             ]
+
+                            # ✅ 构造 DataFrame
+                            df = pd.DataFrame(rows, columns=header_names)
 
                             df = pd.DataFrame(rows, columns=header_names)
                             print("✅ DataFrame:\n", df.head())

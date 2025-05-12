@@ -23,7 +23,7 @@ const UserLogs = () => {
     setLoading(true);
     try {
       let url = `/api/logs/user/${user.id}/operations?page=${page}&per_page=${pageSize}`;
-      if (filters.action) {
+      if (actionFilter) {
         url += `&action=${filters.action}`;
       }
 
@@ -43,7 +43,7 @@ const UserLogs = () => {
 
   useEffect(() => {
     fetchLogs(1, pagination.pageSize);
-  }, [filters]);
+  }, [actionFilter]);
 
   const handleTableChange = (pagination) => {
     fetchLogs(pagination.current, pagination.pageSize);

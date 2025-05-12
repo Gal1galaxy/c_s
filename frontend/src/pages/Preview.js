@@ -20,10 +20,20 @@ const Preview = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!fileId) {
+      message.error('文件 ID 不存在');
+      navigate('/');
+      return;
+    }
     loadFile();
   }, [fileId]);
 
   const loadFile = async () => {
+    if (!fileId) {
+      console.warn('fileId 未定义，跳转回首页');  // 调试日志
+      navigate('/');
+      return;
+    }
     try {
       setLoading(true);
       console.log('Loading file:', fileId, 'shareCode:', shareCode);

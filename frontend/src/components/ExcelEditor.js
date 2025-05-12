@@ -170,30 +170,40 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
       // 转换所有工作表的数据
       const sheetsContent = {};
       
+      // 提取所有 sheet 内容
       Object.entries(allData).forEach(([index, sheetData]) => {
         const sheetName = sheetData.name;
         const rows = sheetData.rows || {};
-        
-        // 获取所有列标题
-        const headers = [];
-        const firstRow = rows[0]?.cells || {};
-        Object.keys(firstRow).forEach(colIndex => {
-          headers[colIndex] = firstRow[colIndex].text || `Column${parseInt(colIndex) + 1}`;
+
+        // 获取表头（列标题）来自第 0 行
+        const headerRow = rows[0]?.cells || {};
+        const headers = {};
+        Object.keys(headerRow).forEach((colIndex) => {
+          const headerText = headerRow[colIndex]?.text?.trim();
+          if (headerText) {
+            headers[colIndex] = headerText;
+          }
         });
-        
-        // 转换数据行
+
         const content = [];
-        Object.keys(rows).forEach((rowIndex, index) => {
-          if (index === 0) return; // 跳过标题行
-          
+
+        // 从第 1 行开始提取内容
+        Object.keys(rows).forEach((rowIndex) => {
+          const ri = parseInt(rowIndex);
+          if (ri === 0) return;
+
           const row = rows[rowIndex].cells || {};
           const rowData = {};
-          headers.forEach((header, colIndex) => {
-            rowData[header] = row[colIndex]?.text || '';
+
+          Object.keys(headers).forEach((colIndex) => {
+            const header = headers[colIndex];
+            const cell = row[colIndex];
+            rowData[header] = cell?.text || '';
           });
+
           content.push(rowData);
         });
-        
+
         sheetsContent[sheetName] = content;
       });
       

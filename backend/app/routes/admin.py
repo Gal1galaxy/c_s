@@ -1,4 +1,4 @@
-from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity   #JWT token机制
+from flask_jwt_extended import get_jwt_identity   #JWT token机制
 from flask import Blueprint, request, jsonify
 from flask_login import current_user
 from app import db
@@ -78,7 +78,7 @@ def update_user(user_id):
 def delete_user(user_id):
     """删除用户"""
     current_user_id = get_jwt_identity()
-    if user_id == current_user.id:
+    if user_id == current_user_id:
         return jsonify({'error': '不能删除自己的账号'}), 400
         
     user = User.query.get_or_404(user_id)

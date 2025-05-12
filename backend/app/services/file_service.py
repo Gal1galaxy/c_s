@@ -20,6 +20,7 @@ from pdf2image import convert_from_path  # 需要安装 pdf2image
 import fitz  # 需要安装 PyMuPDF
 import io
 from PIL import Image
+import pyexcel as pe
 
 class FileService:
     def __init__(self):
@@ -431,27 +432,61 @@ class FileService:
             raise
 ################2025.5.12更改def——handle_excel_file################
     def _handle_excel_file(self, file_path):
-        """处理 Excel 文件"""
+        """处理 Excel 文件，包括 .xlsx 和 .xls"""
         try:
-            engine = 'openpyxl' if file_path.lower().endswith('.xlsx') else 'xlrd'
-            df_dict = pd.read_excel(file_path, sheet_name=None, engine=engine)  # 明确指定引擎
+            extension = file_path.lower().split('.')[-1]
+
             content = {}
 
-            for sheet_name, df in df_dict.items():
-                if not df.empty:
-                    headers = df.columns.tolist()
-                    final_headers = [str(h).strip() if str(h).strip() and not str(h).strip().isdigit() else f'列{i}' for i, h in enumerate(headers)]
-                    print(f"✅ 读取表头：{headers}")
+            if extension == 'xlsx':
+                df_dict = pd.read_excel(file_path, sheet_name=None, engine='openpyxl')
+                for sheet_name, df in df_dict.items():
+                    if not df.empty:
+                        headers = df.columns.tolist()
+                        final_headers = [
+                            str(h).strip() if str(h).strip() and not str(h).strip().isdigit()
+                            else f'列{i}' for i, h in enumerate(headers)
+                        ]
+                        content[sheet_name] = [
+                            {str(i): h for i, h in enumerate(final_headers)}
+                        ] + [
+                            {str(i): str(row[h]) if pd.notna(row[h]) else '' for i, h in enumerate(headers)}
+                            for _, row in df.iterrows()
+                        ]
+                    else:
+                        content[sheet_name] = []
 
-                    content[sheet_name] = [
-                        {str(i): h for i, h in enumerate(headers)}  # 表头行
-                    ] + [
-                        {str(i): str(row[h]) if pd.notna(row[h]) else '' for i, h in enumerate(headers)}
-                        for _, row in df.iterrows()
+            elif extension == 'xls':
+                # 用 pyexcel 加载 .xls 文件
+                book = pe.get_book(file_name=file_path)
+                for sheet in book:
+                    rows = sheet.to_array()
+                    if not rows:
+                        content[sheet.name] = []
+                        continue
+
+                    headers = rows[0]
+                    final_headers = [
+                        str(h).strip() if str(h).strip() and not str(h).strip().isdigit()
+                        else f'列{i}' for i, h in enumerate(headers)
                     ]
-                else:
-                    content[sheet_name] = []
-    
+
+                    sheet_data = [
+                        {str(i): h for i, h in enumerate(final_headers)}
+                    ]
+
+                    for row in rows[1:]:
+                        row_dict = {
+                            str(i): str(row[i]) if i < len(row) and row[i] is not None else ''
+                            for i in range(len(final_headers))
+                        }
+                        sheet_data.append(row_dict)
+
+                    content[sheet.name] = sheet_data
+
+            else:
+                raise ValueError(f"不支持的 Excel 格式: {extension}")
+
             return {
                 'content': content,
                 'file_type': 'Excel'
@@ -460,7 +495,6 @@ class FileService:
         except Exception as e:
             print(f"Error processing Excel file: {str(e)}")
             raise
-
    ################2025.5.12更改def——updatefilecontent################
     def update_file_content(self, file, content):
         """更新文件内容"""

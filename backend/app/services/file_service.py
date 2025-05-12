@@ -494,7 +494,7 @@ class FileService:
     
                             # 构建二维数组
                             rows = [
-                                [row.get(k, '') for k in col_keys]
+                                [row.get(header_names[i], '') for i in range(len(header_keys))]
                                 for row in data
                             ]
     

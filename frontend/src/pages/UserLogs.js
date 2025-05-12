@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Card, Select, DatePicker, Space, Tag, Typography } from 'antd';
+import { Table, Card, Select, Space, Tag, Typography } from 'antd';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import moment from 'moment';
 
-const { RangePicker } = DatePicker;
 const { Option } = Select;
 const { Title } = Typography;
 
@@ -17,7 +16,8 @@ const UserLogs = () => {
     pageSize: 20,
     total: 0
   });
-  
+
+  const [actionFilter, setActionFilter] = useState(null); // 只保留操作类型
 
   const fetchLogs = async (page = 1, pageSize = 20) => {
     setLoading(true);
@@ -111,7 +111,7 @@ const UserLogs = () => {
             <Select
               allowClear
               placeholder="选择操作类型"
-              onChange={(value) => setFilters(prev => ({ ...prev, action: value }))}
+              onChange={(value) => setActionFilter(value)}
               style={{ width: 180 }}
             >
               {actionOptions.map(opt => (

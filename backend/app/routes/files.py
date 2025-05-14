@@ -410,7 +410,7 @@ def update_file_content(file_id):
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/files/<int:file_id>/logs')
-@jwt_required()
+@login_required
 def get_file_logs(file_id):
     """获取文件操作日志"""
     try:

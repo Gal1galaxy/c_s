@@ -1,4 +1,5 @@
 from app import db
+from app.models.user import User
 from datetime import datetime
 
 class File(db.Model):

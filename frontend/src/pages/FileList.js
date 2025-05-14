@@ -152,8 +152,8 @@ const FileList = () => {
     ...(user?.role === 'admin'
       ? [{
           title: '上传者',
-          dataIndex: 'owner_id',
-          key: 'owner_id',
+          dataIndex: 'owner_username',
+          key: 'owner_username',
           width: 120,
           render: (name) => name || '未知用户'
         }]

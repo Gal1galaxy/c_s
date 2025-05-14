@@ -22,7 +22,14 @@ const UserLogs = () => {
   const fetchLogs = async (page = 1, pageSize = 20) => {
     setLoading(true);
     try {
-      let url = `/api/logs/user/${user.id}/operations?page=${page}&per_page=${pageSize}`;
+      let url = '';
+
+      //根据用户身份判断接口（管理员/普通用户）
+      if (user?.role === 'admin') {
+        url = `/api/logs/all/operations?page=${page}&per_page=${pageSize}`;
+      } else {
+        url = `/api/logs/user/${user.id}/operations?page=${page}&per_page=${pageSize}`;
+      
       if (actionFilter) {
         url += `&action=${actionFilter}`;
       }
@@ -32,7 +39,7 @@ const UserLogs = () => {
       setPagination({
         current: page,
         pageSize,
-        total: response.data.total
+        total: response.data.pagination?.total || 0
       });
     } catch (error) {
       console.error('获取日志失败:', error);
@@ -75,6 +82,15 @@ const UserLogs = () => {
         return <Tag color={color}>{action}</Tag>;
       },
     },
+    ...(user?.role === 'admin'
+      ? [{
+          title: '用户名',
+          dataIndex: 'username',
+          key: 'username',
+          width: 120
+        }]
+       :[]
+    ),
     {
       title: '资源ID',
       dataIndex: 'file_id',

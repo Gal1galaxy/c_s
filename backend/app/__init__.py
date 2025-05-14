@@ -71,6 +71,10 @@ def create_app(config_name='default'):
         cors_allowed_origins="*",
         json=json
     )
+
+    #注入socketio到WebSocket协作模块中
+    from .websockets import excel_handler
+    excel_handler.socketio = socketio  #将handler注入当前socketio 实例（使用了全局 socketio）
     
     # 初始化 Flask-Login
     login_manager.init_app(app)

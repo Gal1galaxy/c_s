@@ -177,3 +177,93 @@ def get_file_operation_logs(file_id):
     except Exception as e:
         print(f"Error getting file logs: {str(e)}")
         return jsonify({'error': str(e)}), 500 
+
+@bp.route('/all/operations')
+@login_required
+def get_all_operations():
+    """管理员查看所有操作日志"""
+    try:
+        # 权限校验：只允许管理员访问
+        if not request.current_user.is_admin:
+            return jsonify({'error': '没有权限查看所有日志'}), 403
+        
+        # 获取分页参数
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 20, type=int)
+
+        action = request.args.get('action')
+        start_date_str = request.args.get('start_date')
+        end_date_str = request.args.get('end_date')
+        
+        # 构建查询：关联用户和文件
+        query = db.session.query(
+            OperationLog.id,
+            OperationLog.user_id,
+            User.username,
+            OperationLog.file_id,
+            File.filename,
+            OperationLog.operation_type,
+            OperationLog.operation_detail,
+            OperationLog.created_at
+        ).join(
+            User, OperationLog.user_id == User.id
+        ).outerjoin(
+            File, OperationLog.file_id == File.id
+        ).order_by(OperationLog.created_at.desc())
+
+        # 可选筛选：操作类型
+        if action:
+            query = query.filter(OperationLog.operation_type == action)
+
+        # 可选筛选：开始时间
+        if start_date_str:
+            try:
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+                query = query.filter(OperationLog.created_at >= start_date)
+            except:
+                pass
+
+        # 可选筛选：结束时间
+        if end_date_str:
+            try:
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+                end_date = end_date.replace(hour=23, minute=59, second=59)
+                query = query.filter(OperationLog.created_at <= end_date)
+            except:
+                pass
+
+        # 执行分页
+        pagination = query.paginate(
+            page=page,
+            per_page=per_page,
+            error_out=False
+        )
+
+        # 构造返回数据
+        logs = [{
+            'id': item.id,
+            'user_id': item.user_id,
+            'username': item.username,
+            'file_id': item.file_id,
+            'filename': item.filename,
+            'operation_type': item.operation_type,
+            'operation_detail': item.operation_detail,
+            'created_at': item.created_at.isoformat()
+        } for item in pagination.items]
+
+        return jsonify({
+            'logs': logs,
+            'pagination': {
+                'total': pagination.total,
+                'pages': pagination.pages,
+                'current_page': page,
+                'per_page': per_page,
+                'has_next': pagination.has_next,
+                'has_prev': pagination.has_prev
+            }
+        })
+
+    except Exception as e:
+        print(f"Error getting all logs: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+

@@ -53,7 +53,7 @@ def handle_join(data):
                 uid: data['username'] 
                 for uid, data in file_editors[file_id].items()
             }
-        }, room=room)
+        }, room=room, namespace='/')
         print(f"[WebSocket] 向房间 {room} 广播 user_joined")  #2025.5.14新增日志
         
         # 发送当前文件数据
@@ -85,7 +85,7 @@ def handle_leave(data):
                 uid: data['username'] 
                 for uid, data in file_editors[file_id].items()
             }
-        }, room=room)
+        }, room=room, namespace='/')
     
     leave_room(room)
 
@@ -135,7 +135,7 @@ def handle_lock_cell(data):
         'cell': cell,
         'userId': user_id,
         'username': file_editors[file_id][user_id]['username']
-    }, room=room)
+    }, room=room, namespace='/')
 
 @socketio.on('unlock_cell')
 def handle_unlock_cell(data):
@@ -158,7 +158,7 @@ def handle_unlock_cell(data):
         emit('cell_unlocked', {
             'cell': cell,
             'userId': user_id
-        }, room=room)
+        }, room=room, namespace='/')
 
 @socketio.on('cell_updated')
 def handle_cell_updated(data):
@@ -232,7 +232,7 @@ def handle_save_request(data):
     emit('save_notification', {
         'userId': user_id,
         'username': file_editors[file_id][user_id]['username']
-    }, room=room)
+    }, room=room, namespace='/')
 
 @socketio.on('disconnect')
 def handle_disconnect():

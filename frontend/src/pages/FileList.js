@@ -264,7 +264,7 @@ const FileList = () => {
           </Title>
           {user?.role === 'admin' && (
             <span style={{ marginLeft: '12px', color: 'red', fontSize: '16px' }}>
-              （管理员视图：显示所有用户文件）
+              （管理员界面）
             </span>
             )}
           <FileUpload onSuccess={fetchFiles} />
@@ -292,37 +292,6 @@ const FileList = () => {
              </Row> 
             </Card>
         {/*###################2025.5.11前端新界面###################*/}
-        {/*############初始代码############
-    return (
-    <div style={{ padding: '24px' }}>
-      <Card bordered={false}>
-        <Row gutter={[24, 24]}>
-          <Col span={24}>
-            <Title level={4} style={{ margin: 0, marginBottom: '24px' }}>我的文件</Title>
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <Card bordered={false}>
-              <Statistic
-                title="文件总数"
-                value={stats.totalFiles}
-                prefix={<FileOutlined style={{ color: '#1890ff' }} />}
-              />
-            </Card>
-          </Col>
-                  
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <Card bordered={false}>
-              <Statistic
-                title="存储空间"
-                value={(stats.totalSize / (1024 * 1024)).toFixed(2)}
-                suffix="MB"
-                prefix={<CloudUploadOutlined style={{ color: '#52c41a' }} />}
-              />
-            </Card>
-          </Col>
-        </Row>
-      </Card>
-                ############初始代码############*/}
       <Card 
         bordered={false}
         style={{ marginTop: '24px' }}

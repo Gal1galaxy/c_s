@@ -89,16 +89,6 @@ def download_file(file_id):
         
         file = File.query.get_or_404(file_id)
         
-        '''#########件下载逻辑（初始代码）#########
-        return send_file(
-            file_service.get_decrypted_file_path(file),
-            as_attachment=True,
-            download_name=file.filename
-        )
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-        #########下载逻辑（初始代码）#########'''
-        
          ##################新增2025.5.1更改文件下载逻辑##################
          # 获取解密后的临时文件路径（发送文件）
         temp_path = file_service.get_decrypted_file_path(file)
@@ -125,9 +115,13 @@ def list_files():
     try:
         # 使用请求上下文中的用户信息
         user = request.current_user
-        
-        # 获取用户拥有的文件
-        owned_files = File.query.filter_by(owner_id=user.id).all()
+
+        #管理员获取所有文件
+        if user.role == 'admin':
+            owned_files = File.query.all()
+        else:
+            # 获取用户拥有的文件
+            owned_files = File.query.filter_by(owner_id=user.id).all()
         
         return jsonify({
             'owned_files': [{
@@ -149,7 +143,7 @@ def delete_file(file_id):
     """删除文件"""
     file = File.query.get_or_404(file_id)
     
-    if file.owner_id != request.current_user.id and request.current_user.role != 'admin':
+    if file.owner_id != request.current_user.id and not request.current_user.is_admin:
         return jsonify({'error': '没有权限删除此文件'}), 403
         
     try:
@@ -190,6 +184,7 @@ def preview_file(file_id):
                 token = auth_header.split(' ')[1]
                 decoded_token = decode_token(token)
                 user_id = int(decoded_token['sub'])
+                user = User.query.get(user_id)
             except Exception as e:
                 print(f"Token decode error: {str(e)}")
             
@@ -205,7 +200,7 @@ def preview_file(file_id):
                 return jsonify({'error': '没有权限访问此分享'}), 403
         else:
             # 直接访问需要验证权限
-            if not permission_service.can_read(user_id, file_id):
+            if not (permission_service.can_read(user_id, file_id) or (user and user.is_admin)):
                 print(f"No read permission for user {user_id}")  # 调试日志
                 return jsonify({'error': '无权访问此文件'}), 403
 
@@ -236,7 +231,7 @@ def update_file(file_id):
         original_file = File.query.get_or_404(file_id)
         
         # 检查权限
-        if original_file.owner_id != request.current_user.id:
+        if original_file.owner_id != request.current_user.id and request.current_user.role != 'admin':
             return jsonify({'error': '没有权限修改此文件'}), 403
             
         # 更新文件
@@ -259,7 +254,7 @@ def get_file(file_id):
         file = File.query.get_or_404(file_id)
         
         # 检查权限
-        if not permission_service.can_read(request.current_user.id, file_id):
+        if not (permission_service.can_read(request.current_user.id, file_id) or request.current_user.is_admin):
             return jsonify({'error': '没有权限访问此文件'}), 403
             
         return jsonify({
@@ -294,6 +289,7 @@ def get_file_content(file_id):
                 token = auth_header.split(' ')[1]
                 decoded_token = decode_token(token)
                 user_id = int(decoded_token['sub'])
+                user = User.query.get(user_id)
             except Exception as e:
                 print(f"Token decode error: {str(e)}")
         
@@ -321,17 +317,11 @@ def get_file_content(file_id):
             has_permission = share.can_write
             print(f"Share permission: can_write={has_permission}")  # 调试日志
         else:
-            # 直接访问需要验证权限
-            '''##########初始代码##########
-            if not hasattr(current_user, 'id'):
-                print("User not logged in")  # 调试日志
-                return jsonify({'error': '请先登录'}), 401
-            ##########初始代码##########'''
-                
+            # 直接访问需要验证权限   
             if not user_id:
                 print("User not logged in") # 调试日志
                 return jsonify({'error': '请先登录'}), 401
-            if not permission_service.can_read(user_id, file_id):
+            if not (permission_service.can_read(user_id, file_id) or (user and user.is_admin)):
                 print(f"No read permission for user {user_id}")  # 调试日志
                 return jsonify({'error': '无权访问此文件'}), 403
                 
@@ -403,7 +393,10 @@ def update_file_content(file_id):
                 return jsonify({'error': '无编辑权限'}), 403
         else:
             # 直接访问需要验证权限
-            if not user_id or not permission_service.can_write(user_id, file_id):
+            if not user_id:
+                return jsonify({'error': '无权编辑此文件'}), 403
+                
+            if not (permission_service.can_write(user_id, file_id) or User.query.get(user_id).role == 'admin'):
                 return jsonify({'error': '无权编辑此文件'}), 403
         
         file = File.query.get_or_404(file_id)
@@ -422,7 +415,7 @@ def get_file_logs(file_id):
         file = File.query.get_or_404(file_id)
         
         # 检查权限
-        if not permission_service.can_read(current_user.id, file_id):
+        if not (permission_service.can_read(current_user.id, file_id) or current_user.role == 'admin'):
             return jsonify({'error': '没有权限查看此文件的日志'}), 403
         
         # 获取日志

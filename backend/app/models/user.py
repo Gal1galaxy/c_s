@@ -25,6 +25,11 @@ class User(UserMixin, db.Model):
     @property
     def is_authenticated(self):
         return True
+
+    @property
+    #管理员
+    def is_admin(self):
+        return self.role == 'admin'
         
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

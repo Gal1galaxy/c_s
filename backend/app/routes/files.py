@@ -130,7 +130,7 @@ def list_files():
                 'file_type': file.file_type,
                 'file_size': file.file_size,
                 'created_at': file.created_at.isoformat() if file.created_at else None,
-                'is_public': file.is_public
+                'is_public': file.is_public,
                 'owner_id': file.owner_id
             } for file in owned_files]
         })

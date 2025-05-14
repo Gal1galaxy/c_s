@@ -29,6 +29,7 @@ const UserLogs = () => {
         url = `/api/logs/all/operations?page=${page}&per_page=${pageSize}`;
       } else {
         url = `/api/logs/user/${user.id}/operations?page=${page}&per_page=${pageSize}`;
+      }
       
       if (actionFilter) {
         url += `&action=${actionFilter}`;

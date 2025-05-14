@@ -11,6 +11,7 @@ from app.services.share_service import ShareService
 from app.utils.auth import login_required  # 使用自定义的装饰器
 from app.models.operation_log import OperationLog
 from flask_jwt_extended import jwt_required
+from app.models.user import User
 import os
 
 bp = Blueprint('files', __name__, url_prefix='/api/files')

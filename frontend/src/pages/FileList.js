@@ -7,10 +7,12 @@ import moment from 'moment'; //增加 解决前后端时间同步问题
 import FileUpload from '../components/FileUpload';
 import { useNavigate } from 'react-router-dom';
 import ShareFileModal from '../components/ShareFileModal';
+import { useAuth } from '../contexts/AuthContext';
 
 const { Title } = Typography;
 
 const FileList = () => {
+  const { user } = useAuth();  //获取当前登录用户
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState({
@@ -147,6 +149,15 @@ const FileList = () => {
         </Space>
       ),
     },
+    ...(user?.role === 'admin'
+      ? [{
+          title: '上传者',
+          dataIndex: 'owner_id',
+          key: 'owner_id',
+          width: 100,
+          render: (id) => `用户ID: ${id}`
+        }]
+      :[]),
     {
       title: '类型',
       dataIndex: 'file_type',
@@ -251,6 +262,11 @@ const FileList = () => {
           <Title level={3} style={{ margin: 0 }}>
             我的文件
           </Title>
+          {user?.role === 'admin' && (
+            <span style={{ marginLeft: '12px', color: 'red', fontSize: '16px' }}>
+              （管理员视图：显示所有用户文件）
+            </span>
+            )}
           <FileUpload onSuccess={fetchFiles} />
          </div>
          <Row gutter={[16, 16]} style={{ marginTop: '8px' }}>

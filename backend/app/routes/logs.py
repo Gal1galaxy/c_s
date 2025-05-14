@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt, current_user
+from flask_jwt_extended import jwt_required, get_jwt
 from app.utils.auth import login_required 
 from app.models.operation_log import OperationLog
 from app.models.user import User
@@ -10,7 +10,6 @@ from datetime import datetime
 bp = Blueprint('logs', __name__, url_prefix='/api/logs')
 
 @bp.route('/user/<int:user_id>/operations')
-#@jwt_required()
 @login_required
 def get_user_operation_logs(user_id):
     """获取用户的操作日志"""
@@ -113,7 +112,7 @@ def get_file_operation_logs(file_id):
     """获取文件的操作日志"""
     try:
         # 获取当前用户ID
-        current_user_id = get_jwt_identity()
+        current_user_id = request.current_user.id
         if not current_user_id:
             return jsonify({'error': '未认证'}), 401
             

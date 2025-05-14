@@ -12,6 +12,15 @@ permission_service = PermissionService()
 active_editors = {}  # {file_id: {user_id: timestamp}}
 file_contents = {}   # {file_id: DataFrame}
 
+def extract_user_id_from_token(token):
+     """从 JWT token 中提取用户 ID"""
+    try:
+        decoded = decode_token(token)
+        return int(decoded['sub'])
+    except Exception as e:
+        print(f"Token decode error: {str(e)}")
+        return None
+
 @socketio.on('connect')
 def handle_connect():
     emit('connected', {'message': '连接成功'})
@@ -21,6 +30,10 @@ def handle_join(data):
     """加入协同编辑"""
     file_id = data['file_id']
     user_id = data['user_id']
+
+    if not user_id:
+         emit('error', {'message': '无效身份，请重新登录'})
+         return
     
     # 检查权限
     if not permission_service.can_write(user_id, file_id):
@@ -62,6 +75,12 @@ def handle_cell_update(data):
     row = data['row']
     col = data['col']
     value = data['value']
+    token = data.get('auth', {}).get('token')
+    user_id = extract_user_id_from_token(token)
+
+     if not user_id:
+         emit('error', {'message': '未授权'})
+         return
     
     room = f'file_{file_id}'
     
@@ -82,7 +101,12 @@ def handle_cell_update(data):
 def handle_save(data):
     """保存文件"""
     file_id = data['file_id']
-    user_id = data['user_id']
+    token = data.get('auth', {}).get('token')
+    user_id = extract_user_id_from_token(token)
+
+    if not user_id:
+        emit('error', {'message': '未授权'})
+        return
     
     if file_id in file_contents:
         try:
@@ -97,7 +121,12 @@ def handle_save(data):
 def handle_leave(data):
     """离开协同编辑"""
     file_id = data['file_id']
-    user_id = data['user_id']
+    token = data.get('auth', {}).get('token')
+    user_id = extract_user_id_from_token(token)
+
+    if not user_id:
+        return
+        
     room = f'file_{file_id}'
     
     # 清理编辑状态

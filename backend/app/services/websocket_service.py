@@ -1,4 +1,5 @@
 from flask_socketio import SocketIO, emit, join_room, leave_room
+from flask_jwt_extended import decode_token
 from app.services.permission_service import PermissionService
 from app.models.file import File
 import json
@@ -13,7 +14,7 @@ active_editors = {}  # {file_id: {user_id: timestamp}}
 file_contents = {}   # {file_id: DataFrame}
 
 def extract_user_id_from_token(token):
-     """从 JWT token 中提取用户 ID"""
+    """从 JWT token 中提取用户 ID"""
     try:
         decoded = decode_token(token)
         return int(decoded['sub'])
@@ -29,7 +30,8 @@ def handle_connect():
 def handle_join(data):
     """加入协同编辑"""
     file_id = data['file_id']
-    user_id = data['user_id']
+    token = data.get('auth', {}).get('token')
+    user_id = extract_user_id_from_token(token)
 
     if not user_id:
          emit('error', {'message': '无效身份，请重新登录'})

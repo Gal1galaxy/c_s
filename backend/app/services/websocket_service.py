@@ -73,14 +73,13 @@ def handle_join(data):
 def handle_cell_update(data):
     """处理单元格更新"""
     file_id = data['file_id']
-    user_id = data['user_id']
     row = data['row']
     col = data['col']
     value = data['value']
     token = data.get('auth', {}).get('token')
     user_id = extract_user_id_from_token(token)
 
-     if not user_id:
+    if not user_id:
          emit('error', {'message': '未授权'})
          return
     

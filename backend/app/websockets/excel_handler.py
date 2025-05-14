@@ -35,6 +35,7 @@ def handle_join(data):
         # 加入房间
         room = f'file_{file_id}'
         join_room(room)
+        print(f"[WebSocket] 用户 {user_id} 加入房间 {room} (sid={request.sid})") #2025.5.14调试日志
         
         # 记录编辑者
         if file_id not in file_editors:
@@ -53,6 +54,7 @@ def handle_join(data):
                 for uid, data in file_editors[file_id].items()
             }
         }, room=room)
+        print(f"[WebSocket] 向房间 {room} 广播 user_joined")  #2025.5.14新增日志
         
         # 发送当前文件数据
         if file_id in file_data:
@@ -75,6 +77,7 @@ def handle_leave(data):
         user_data = file_editors[file_id].pop(user_id)
         
         # 广播用户离开
+        print(f"[WebSocket] 用户 {user_id} 离开房间 {room}") #2025.5.14调试日志
         emit('user_left', {
             'userId': user_id,
             'username': user_data['username'],
@@ -127,6 +130,7 @@ def handle_lock_cell(data):
     }
     
     # 广播锁定状态
+    print(f"[WebSocket] 广播 cell_updated 到 room={room}, 内容={data}") #2025.5.14新增调试日志
     emit('cell_locked', {
         'cell': cell,
         'userId': user_id,

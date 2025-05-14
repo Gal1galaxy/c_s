@@ -154,8 +154,8 @@ const FileList = () => {
           title: '上传者',
           dataIndex: 'owner_id',
           key: 'owner_id',
-          width: 100,
-          render: (id) => `用户ID: ${id}`
+          width: 120,
+          render: (name) => name || '未知用户'
         }]
       :[]),
     {

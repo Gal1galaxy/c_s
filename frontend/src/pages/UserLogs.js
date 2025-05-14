@@ -39,7 +39,7 @@ const UserLogs = () => {
       setPagination({
         current: page,
         pageSize,
-        total: response.data.pagination?.total || 0
+        total: (response.data.pagination && response.data.pagination.total) || 0
       });
     } catch (error) {
       console.error('获取日志失败:', error);

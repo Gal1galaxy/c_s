@@ -131,7 +131,8 @@ def list_files():
                 'file_size': file.file_size,
                 'created_at': file.created_at.isoformat() if file.created_at else None,
                 'is_public': file.is_public,
-                'owner_id': file.owner_id
+                'owner_id': file.owner_id  #用户id
+                'owner_username': file.owner.username if file.owner else None  #用户名
             } for file in owned_files]
         })
     except Exception as e:

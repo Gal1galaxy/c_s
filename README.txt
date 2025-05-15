@@ -54,8 +54,11 @@ cloud-storage/
 2、安装依赖：
 安装nodejs，如果已经安装可以跳过这一步，或者用其他方式安装nodejs和npm
 sudo apt-get install nodejs npm
+配置nginx代理
+sudo nginx -t         # 检查语法是否正确
+sudo nginx -s reload  # 重载配置使其生效
 
-安装需要的软件包
+#安装需要的软件包
 sudo apt-get install poppler-utils
 
 安装依赖的npm包：
@@ -69,6 +72,8 @@ pip install -r backend/requirements.txt
 
 3、运行：
 
+在/backend先运行_init_db.py初始化数据库
+
 先运行后端：
 cd backend
 python run.py 
@@ -76,6 +81,6 @@ python run.py
 
 运行前端：
 cd frontend
-npm start
-这样会自动打开浏览器，访问http://localhost:3000，即可使用。
-可以用admin用户登录，密码是admin。
+npm run build
+打开浏览器就可以正常访问了
+可以用admin用户登录，密码是admin123。

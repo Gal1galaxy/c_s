@@ -25,6 +25,9 @@ share_service = ShareService()
 @login_required
 def upload_file():
     """上传文件"""
+    print("== 收到上传请求 ==")
+    print("请求体大小 (content-length):", request.content_length)
+    print("request.files 是否为空:", len(request.files))
     if 'file' not in request.files:
         return jsonify({'error': '没有文件'}), 400
         

@@ -16,6 +16,7 @@ const FileUpload = ({ onSuccess }) => {
       await axios.post('/api/files/upload', formData, {
         headers: {
           Authorization: `Bearer ${token}`,        //新增2025.5.6 axios.post加上请求头
+          'Content-Type': 'multipart/form-data'  // ✅ 显式添加
         }
       });
       message.success('文件上传成功');

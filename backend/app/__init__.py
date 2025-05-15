@@ -34,7 +34,7 @@ login_manager = LoginManager()
 
 def create_app(config_name='default'):
     app = Flask(__name__)
-    app.config.from_object(config)
+    app.config.from_object(config[config_name])
     
     # 设置 secret key
     app.secret_key = app.config['SECRET_KEY']

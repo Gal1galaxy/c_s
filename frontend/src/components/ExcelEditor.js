@@ -678,6 +678,21 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
     });
     spreadsheetRef.current.on('cell-edited', handleCellEditEnd);
 
+    //全局监听
+    spreadsheetRef.current.on('change', () => {
+      if (!canWrite) return;
+
+      const allData = spreadsheetRef.current.getData();
+      socketRef.current?.emit('sync_data', {
+        fileId,
+        userId: user?.id,
+        shareCode,
+        data: allData
+      });
+
+      console.log('[client] sync_data emitted due to change');
+    });
+
     // 加载文件
     loadExcelData();
 

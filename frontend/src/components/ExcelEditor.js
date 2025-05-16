@@ -440,19 +440,16 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
       // 初次加入时接收服务端同步的完整表格内容
       socketRef.current.on('sync_data', ({ data, fromUserId }) => {
         if (!data || typeof data !== 'object') return;
-
-        if (fromUserId === user?.id) {
-          console.log('[client] 忽略自己发出的 sync_data，避免重复覆盖');
-          return;
-        }
-
-        // 插入初始化完成判断逻辑(全局广播更新增加前置条件)
+        if (fromUserId === user?.id) return;
         if (!isInitialLoadDone) {
           console.log('[client] 表格尚未初始化完成，跳过 sync_data');
           return;
         }
+        const sheetNames = Object.keys(data);
+        if (sheetNames.length === 0) return;
+        const valid = sheetNames.every(name => data[name] && typeof data[name] === 'object' && data[name].rows);
+        if (!valid) return;
 
-        // ✅ 使用 spreadsheetRef.current.loadData 覆盖全量数据，确保格式、合并、样式一致
         try {
           spreadsheetRef.current?.loadData(data);
           console.log('[client] 同步整张表数据完成');
@@ -464,7 +461,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
 
       // 处理有用户加入协作
       socketRef.current.on('user_joined', ({ userId, username, editors: newEditors, canWrite: serverCanWrite, currentUser }) => {
-        setEditors(newEditors);  // 更新本地协作用户列表
+        setEditors(newEditors); // 更新本地协作用户列表
         if (userId === user?.id) {
         // 自己成功加入协作
           setSocketReady(true);
@@ -473,7 +470,6 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
           // 有其他用户加入协作
           message.info(`${username || '用户'} 加入了编辑`);
         }
-        console.log('User joined event:', { userId, username, serverCanWrite, currentUser });
       });
 
       // 处理有用户离开协作
@@ -673,55 +669,52 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
   // 添加一个初始化编辑器的函数
   const initializeSpreadsheet = () => {
     if (!containerRef.current || spreadsheetRef.current) return;
+
     const container = containerRef.current;
-    // 创建 x-spreadsheet 实例并设置模式、外观等选项
+    const containerWidth = container.offsetWidth;
+    const containerHeight = container.offsetHeight;
+
     spreadsheetRef.current = new Spreadsheet(container, {
       mode: canWrite ? 'edit' : 'read',
       showToolbar: canWrite,
       showGrid: true,
       showContextmenu: canWrite,
-      view: { height: () => container.offsetHeight, width: () => container.offsetWidth },
+      view: {
+        height: () => containerHeight,
+        width: () => containerWidth,
+      },
       row: { len: 100, height: 25 },
       col: { len: 26, width: 100, indexWidth: 60, minWidth: 60 },
       style: {
-        bgcolor: '#ffffff',
-        align: 'left',
-        valign: 'middle',
-        textwrap: false,
-        strike: false,
-        underline: false,
-        color: '#0a0a0a',
-        font: { name: 'Helvetica', size: 10, bold: false, italic: false }
+        bgcolor: '#ffffff', align: 'left', valign: 'middle',
+        textwrap: false, strike: false, underline: false, color: '#0a0a0a',
+        font: { name: 'Helvetica', size: 10, bold: false, italic: false },
       }
-      // （取消原有 onSelected/onCellEdited 内联配置，用统一事件绑定替代）
     });
 
-    // 绑定单元格选中事件：选中单元格时请求锁定该单元格
     spreadsheetRef.current.on('cell-selected', (cell, ri, ci) => {
-      if (canWrite) {
-        handleCellEditStart(ri, ci);
-      }
+      if (canWrite) handleCellEditStart(ri, ci);
     });
-    // 绑定单元格编辑完成事件：内容改动后解除锁定并通知后端更新
+
     spreadsheetRef.current.on('cell-edited', handleCellEditEnd);
 
-    // **全局表格变更事件监听**：包括文本、样式、合并、拖拽填充等任何更改
+    // ✅ 添加 change 监听实现同步 styles/merges 等高级操作
     spreadsheetRef.current.change((data) => {
       if (!canWrite || !isInitialLoadDone) return;
-      // 通过 Socket 实时广播整份工作簿数据以同步所有改动
+
       socketRef.current?.emit('sync_data', {
         fileId,
         userId: user?.id,
         shareCode,
         fromUserId: user?.id,
-        data      // x-data-spreadsheet 返回的最新完整数据集
+        data
       });
-      console.log('[client] sync_data emitted (full workbook data) for real-time sync');
+      console.log('[client] sync_data emitted with all data to sync formatting or merges');
     });
 
-    // 加载文件，并在完成后初始化 WebSocket
+    // ✅ 加载文件完成后初始化 socket
     loadExcelData().then(() => {
-      initializeSocket();
+      if (canWrite) initializeSocket();
     });
   };
 

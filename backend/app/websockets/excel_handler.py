@@ -294,6 +294,46 @@ def cleanup_expired_locks():
                     'userId': lock_info['user_id']
                 }, room=f'file_{file_id}')
 
+#全局监听
+@socketio.on('sync_data')
+def handle_sync_data(data):
+    """处理整表同步数据广播"""
+    try:
+        file_id = str(data.get('fileId'))
+        user_id = str(data.get('userId'))
+        share_code = data.get('shareCode')
+        spreadsheet_data = data.get('data')
+
+        print(f"[sync_data] 收到用户 {user_id} 对文件 {file_id} 的同步请求")
+
+        # 权限检查
+        if not permission_service.can_write(user_id, file_id, share_code):
+            print(f"[sync_data] 用户 {user_id} 没有写入权限")
+            emit('error', {'message': '没有编辑权限'})
+            return
+
+        # 缓存更新整张表内容
+        if file_id not in file_data:
+            file_data[file_id] = {
+                'cells': {},
+                'last_updated': datetime.utcnow(),
+                'sheets': {}
+            }
+
+        file_data[file_id]['sheets'] = spreadsheet_data
+        file_data[file_id]['last_updated'] = datetime.utcnow()
+
+        # 广播给房间内其他用户
+        emit('sync_data', {
+            'data': spreadsheet_data
+        }, room=f'file_{file_id}', include_self=False)
+
+        print(f"[sync_data] 广播至 file_{file_id} 成功")
+    except Exception as e:
+        print(f"[sync_data] Error: {str(e)}")
+        emit('error', {'message': str(e)})
+
+
 # 设置定期清理任务
 from apscheduler.schedulers.background import BackgroundScheduler
 scheduler = BackgroundScheduler()

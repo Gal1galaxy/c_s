@@ -16,79 +16,74 @@ cell_locks = {}   # {file_id: {'cell_key': {'user_id': user_id, 'username': user
 
 @socketio.on('join_edit')
 def handle_join(data):
-    """处理用户加入编辑"""
-    try:
-        file_id = str(data.get('fileId'))
-        user_id = str(data.get('userId'))
-        username = data.get('username')
-        share_code = data.get('shareCode')
-        
-        print(f"Checking permission for user {user_id} on file {file_id}")  # 调试日志
-        
-        # 检查权限
-        if not permission_service.can_write(user_id, file_id, share_code):
-            print(f"Permission denied for user {user_id} on file {file_id}")  # 调试日志
-            emit('error', {'message': '没有编辑权限'})
-            return
-            
-        print(f"Permission granted for user {user_id} on file {file_id}")  # 调试日志
-        
-        # 加入房间
-        room = f'file_{file_id}'
-        join_room(room)
-        print(f"[WebSocket] 用户 {user_id} 加入房间 {room} (sid={request.sid})") #2025.5.14调试日志
-        
-        # 记录编辑者
-        if file_id not in file_editors:
-            file_editors[file_id] = {}
-        file_editors[file_id][user_id] = {
-            'username': username,
-            'last_active': datetime.utcnow()
-        }
-        
-        # 广播新用户加入
-        emit('user_joined', {
-            'userId': user_id,
-            'username': username,
-            'editors': {
-                uid: data['username'] 
-                for uid, data in file_editors[file_id].items()
-            }
-        }, room=room, namespace='/')
-        print(f"[WebSocket] 向房间 {room} 广播 user_joined")  #2025.5.14新增日志
-        
-        # 发送当前文件数据
-        if file_id in file_data:
-            emit('sync_data', {
-                'data': file_data[file_id]['cells']
-            })
-    except Exception as e:
-        print(f"Error in handle_join: {str(e)}")  # 调试日志
-        emit('error', {'message': f'加入编辑失败: {str(e)}'})
+    file_id = str(data.get('fileId'))
+    user_id = str(data.get('userId'))
+    username = data.get('username')
+    share_code = data.get('shareCode')
+    room = f"file_{file_id}"
+
+    if not user_id or not file_id:
+        emit('error', {'message': '参数缺失'})
+        return
+
+    if not check_write_permission(user_id, file_id, share_code):
+        emit('error', {'message': '没有编辑权限'})
+        return
+
+    join_room(room)
+
+    if file_id not in file_editors:
+        file_editors[file_id] = {}
+    file_editors[file_id][user_id] = {
+        'username': username,
+        'last_active': datetime.utcnow(),
+        'sid': request.sid
+    }
+
+    emit('user_joined', {
+        'userId': user_id,
+        'username': username,
+        'editors': {
+            uid: editor['username'] for uid, editor in file_editors[file_id].items()
+        },
+        'canWrite': True,
+        'currentUser': user_id
+    }, room=room, include_self=False)
+
+    # ✅ 发送缓存中的完整表格数据给当前用户（避免用 file_data[file_id]['cells']）
+    if file_id in file_data and 'sheets' in file_data[file_id]:
+        emit('sync_data', {
+            'data': file_data[file_id]['sheets'],
+            'fromUserId': user_id
+        }, to=request.sid)
+
 
 @socketio.on('leave_edit')
 def handle_leave(data):
-    """处理用户离开编辑"""
     file_id = str(data.get('fileId'))
     user_id = str(data.get('userId'))
-    room = f'file_{file_id}'
-    
-    # 移除编辑者
+    room = f"file_{file_id}"
+
     if file_id in file_editors and user_id in file_editors[file_id]:
-        user_data = file_editors[file_id].pop(user_id)
-        
-        # 广播用户离开
-        print(f"[WebSocket] 用户 {user_id} 离开房间 {room}") #2025.5.14调试日志
+        username = file_editors[file_id][user_id]['username']
+        del file_editors[file_id][user_id]
+
         emit('user_left', {
             'userId': user_id,
-            'username': user_data['username'],
+            'username': username,
             'editors': {
-                uid: data['username'] 
-                for uid, data in file_editors[file_id].items()
+                uid: editor['username'] for uid, editor in file_editors[file_id].items()
             }
-        }, room=room, namespace='/')
-    
+        }, room=room)
+
     leave_room(room)
+
+    # ✅ 如果当前文件协作者为空，清理所有相关状态
+    if not file_editors.get(file_id):
+        file_editors.pop(file_id, None)
+        file_data.pop(file_id, None)
+        cell_locks.pop(file_id, None)
+
 
 @socketio.on('lock_cell')
 def handle_lock_cell(data):
@@ -242,54 +237,26 @@ def handle_cell_updated(data):
 
 @socketio.on('sync_data')
 def handle_sync_data(data):
-    """处理前端全局广播的完整数据同步请求"""
-    try:
-        file_id = str(data.get('fileId'))
-        user_id = str(data.get('userId'))
-        share_code = data.get('shareCode')
-        updated_data = data.get('data')
+    file_id = str(data.get('fileId'))
+    user_id = str(data.get('userId'))
+    updated_data = data.get('data')
+    from_user_id = data.get('fromUserId')
+    room = f"file_{file_id}"
 
-        room = f'file_{file_id}'
-        print(f"[sync_data] from user {user_id} broadcasting to room: {room}")
+    if not updated_data:
+        print('[sync_data] 无更新数据，忽略')
+        return
 
-        # 如果数据为空，跳过处理
-        if updated_data is None:
-            print(f"[sync_data] 收到空数据，跳过缓存更新 file_id={file_id}")
-            return
+    # ✅ 缓存完整 sheet 数据
+    if file_id not in file_data:
+        file_data[file_id] = {}
+    file_data[file_id]['sheets'] = updated_data
 
-        # 初始化缓存结构
-        if file_id not in file_data:
-            file_data[file_id] = {
-                'cells': {},
-                'last_updated': datetime.utcnow(),
-                'sheets': {}
-            }
-
-        # 更新完整结构
-        file_data[file_id]['sheets'] = updated_data
-        file_data[file_id]['last_updated'] = datetime.utcnow()
-
-        #  重构 flat cells 缓存，确保刷新后能使用 loadData 渲染
-        flat_cells = {}
-        for sheet_name, sheet in updated_data.items():
-            rows = sheet.get('rows', {})
-            for row_idx, row_data in rows.items():
-                cells = row_data.get('cells', {})
-                for col_idx, cell in cells.items():
-                    cell_key = f"{sheet_name}_{row_idx}_{col_idx}"
-                    flat_cells[cell_key] = cell.get('text', '')
-
-        file_data[file_id]['cells'] = flat_cells  # 用于 refresh 后加载数据
-
-        # 广播更新（给其他用户）
-        emit('sync_data', {
-            'data': updated_data,
-            'fromUserId': user_id
-        }, room=room, include_self=False)
-
-    except Exception as e:
-        print(f"Error in handle_sync_data: {str(e)}")
-        emit('error', {'message': f'sync_data 广播失败: {str(e)}'})
+    # ✅ 广播给其他用户（不包含发起者）
+    emit('sync_data', {
+        'data': updated_data,
+        'fromUserId': from_user_id
+    }, room=room, include_self=False)
 
 
 
@@ -313,17 +280,13 @@ def handle_save_request(data):
     }, room=room, namespace='/')
 
 @socketio.on('disconnect')
-def handle_disconnect(sid):
-    """处理连接断开"""
-    print(f"[disconnect] SID: {sid}")
-    for file_id in list(file_editors.keys()):
-        for user_id in list(file_editors[file_id].keys()):
-            # 使用Flask-SocketIO提供的sid判断逻辑改写（手动绑定不可靠）
-            # 所以不判断sid，而是直接触发leave_edit
-            handle_leave({
-                'fileId': file_id,
-                'userId': user_id
-            })
+def handle_disconnect():
+    sid = request.sid
+    for fid, editors in list(file_editors.items()):
+        for uid, info in list(editors.items()):
+            if info.get('sid') == sid:
+                handle_leave({'fileId': fid, 'userId': uid})
+                break
 
 
 # 定期清理不活跃的编辑者

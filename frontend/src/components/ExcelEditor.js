@@ -439,40 +439,20 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
 
       // 初次加入时接收服务端同步的完整表格内容
       socketRef.current.on('sync_data', ({ data, fromUserId }) => {
-          // 若没有有效数据对象，则不处理
-          if (!data || typeof data !== 'object') return;
-          // 1️⃣ 忽略自己发出的 sync_data，避免重复加载自身广播的数据
-          if (fromUserId === user?.id) {
-              console.log('[client] 忽略自己发出的 sync_data，避免重复加载');
-              return;
-          }
-          // 2️⃣ 确保表格已初始化完成后再处理同步数据，否则跳过
-          if (!isInitialLoadDone) {
-              console.log('[client] 表格尚未初始化完成，跳过 sync_data');
-              return;
-          }
-          // 3️⃣ 验证收到的数据结构正确（包含 sheet 名和 rows 等）
-          const sheetNames = Object.keys(data);
-          if (sheetNames.length === 0) {
-              console.error('[client] 收到 sync_data 数据为空，跳过处理');
-              return;
-           }
-          const validStructure = sheetNames.every(sheetName => {
-              const sheetData = data[sheetName];
-              return sheetData && typeof sheetData === 'object' 
-                  && sheetData.rows && typeof sheetData.rows === 'object';
-          });
-          if (!validStructure) {
-              console.error('[client] 收到无效的 sync_data 数据结构，缺少 sheet 名或 rows，跳过处理');
-              return;
-          }
-          // 数据格式有效，转换为 x-spreadsheet 所需格式并加载到表格
-          const converted = sheetNames.map((sheetName, idx) => ({
-              name: sheetName,
-              index: idx,
-              ...data[sheetName]
-          }));
-          spreadsheetRef.current?.loadData(converted);
+        if (!data || typeof data !== 'object') return;
+
+        if (fromUserId === user?.id) {
+          console.log('[client] 忽略自己发出的 sync_data，避免重复覆盖');
+          return;
+        }
+
+        // ✅ 使用 spreadsheetRef.current.loadData 覆盖全量数据，确保格式、合并、样式一致
+        try {
+          spreadsheetRef.current?.loadData(data);
+          console.log('[client] 同步整张表数据完成');
+        } catch (e) {
+          console.error('[client] sync_data apply failed:', e);
+        }
       });
 
 
@@ -746,9 +726,9 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
           userId: user?.id,
           shareCode,
           fromUserId: user?.id,
-          data: allData
+          data: allData  //同步整张表结构，包括 styles/merges 等
       });
-      console.log('[client] sync_data emitted with all data to avoid overwrite');
+      console.log('[client] sync_data emitted with all data to sync formatting or merges');
       }
     });
 

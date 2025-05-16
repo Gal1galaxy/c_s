@@ -200,8 +200,9 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
         headerKeys.forEach((colIndex) => {
           const cellText = headerRow[colIndex]?.text?.trim() || '';
           headerDict[colIndex.toString()] = cellText;
-          const isInvalidHeader = /^(列\d+|Unnamed.*|\d+)$/.test(cellText);  //非法表头判断
-          if (cellText !== '' && !isInvalidHeader) {
+          //const isInvalidHeader = /^(列\d+|Unnamed.*|\d+)$/.test(cellText);  //非法表头判断
+          //if (cellText !== '' && !isInvalidHeader) {
+          if (cellText !== '') {
             hasRealHeader = true; // 如果有非数字表头，视为真实表头
           }
         });

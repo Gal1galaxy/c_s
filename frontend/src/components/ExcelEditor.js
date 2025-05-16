@@ -254,6 +254,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
       fileId,
       userId: user.id,
       username: user.username,
+      shareCode: shareCode,
       cell
     });
     
@@ -328,6 +329,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
         socketRef.current?.emit('unlock_cell', {
             fileId,
             userId: user?.id,
+            shareCode: shareCode,
             cell
         });
         
@@ -372,7 +374,8 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
         socketRef.current.emit('join_edit', {
           fileId,
           userId: user?.id,
-          username: user?.username
+          username: user?.username,
+          shareCode: shareCode
         });
       });
 
@@ -569,6 +572,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
       socketRef.current?.emit('save_request', {
         fileId,
         userId: user.id
+        shareCode: shareCode
       });
 
       const data = spreadsheetRef.current.getData();

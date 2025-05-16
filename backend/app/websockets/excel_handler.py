@@ -95,9 +95,10 @@ def handle_lock_cell(data):
     file_id = str(data.get('fileId'))
     user_id = str(data.get('userId'))
     cell = data.get('cell')
+    share_code = data.get('shareCode')
     
     print(f"Locking cell {cell} for user {user_id} on file {file_id}")
-    if not permission_service.can_write(user_id, file_id):
+    if not permission_service.can_write(user_id, file_id, share_code):
         emit('error', {'message': '没有编辑权限'})
         return
         

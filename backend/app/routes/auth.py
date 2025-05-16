@@ -122,19 +122,3 @@ def get_profile():
         print(f"Get profile error: {str(e)}")
         return jsonify({'error': '获取用户信息失败'}), 500
 ###############2025.5.1更改获取用户信息逻辑，使用JWT token的信息解析出user_id再查询用户###############
-'''###############初始获取用户信息逻辑###############
-def get_profile():
-    """获取用户信息"""
-    try:
-        return jsonify({
-            'user': {
-                'id': current_user.id,
-                'username': current_user.username,
-                'email': current_user.email,
-                'role': current_user.role
-            }
-        })
-    except Exception as e:
-        print(f"Get profile error: {str(e)}")  # 调试日志
-        return jsonify({'error': '获取用户信息失败'}), 500 
-        ###############初始获取用户信息逻辑###############'''

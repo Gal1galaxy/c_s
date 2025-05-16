@@ -235,6 +235,36 @@ def handle_cell_updated(data):
         print(f"Error in handle_cell_updated: {str(e)}")  # 添加错误日志
         emit('error', {'message': str(e)})
 
+@socketio.on('sync_data')
+def handle_sync_data(data):
+    """处理前端全局广播的完整数据同步请求"""
+    try:
+        file_id = str(data.get('fileId'))
+        user_id = str(data.get('userId'))
+        share_code = data.get('shareCode')
+        updated_data = data.get('data')
+
+        room = f'file_{file_id}'
+        print(f"[sync_data] from user {user_id} broadcasting to room: {room}")
+
+        # 更新缓存（可选）
+        if file_id not in file_data:
+            file_data[file_id] = {
+                'cells': {},
+                'last_updated': datetime.utcnow(),
+                'sheets': {}
+            }
+        file_data[file_id]['sheets'] = updated_data
+        file_data[file_id]['last_updated'] = datetime.utcnow()
+
+        # 广播给除发送者外的所有人
+        emit('sync_data', {'data': updated_data}, room=room, include_self=False)
+
+    except Exception as e:
+        print(f"Error in handle_sync_data: {str(e)}")
+        emit('error', {'message': f'sync_data 广播失败: {str(e)}'})
+
+
 @socketio.on('save_request')
 def handle_save_request(data):
     """处理保存请求"""
@@ -293,6 +323,8 @@ def cleanup_expired_locks():
                     },
                     'userId': lock_info['user_id']
                 }, room=f'file_{file_id}')
+
+
 
 # 设置定期清理任务
 from apscheduler.schedulers.background import BackgroundScheduler

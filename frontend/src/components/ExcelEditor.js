@@ -91,11 +91,11 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
           
           if (Array.isArray(sheetContent)) {
             // 获取所有列名
-            const allColumns = new Set();
-            sheetContent.forEach(row => {
-              Object.keys(row).forEach(key => allColumns.add(key));
-            });
-            const columns = Array.from(allColumns);
+            let columns = [];
+            if (sheetContent.length > 0) {
+              const headerRow = sheetContent[0];
+              columns = Object.keys(headerRow);
+            }
             
             // 创建工作表数据
             const rows = {};

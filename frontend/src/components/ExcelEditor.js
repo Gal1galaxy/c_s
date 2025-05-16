@@ -84,7 +84,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
       
       if (response.data && response.data.content) {
         const sheetsData = response.data.content;
-        const convertedData = {};
+        const convertedData = [];
         
         // 处理每个工作表
         Object.keys(sheetsData).sort().forEach((sheetName) => {
@@ -126,11 +126,11 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
             });
             
             // 添加工作表
-            convertedData[sheetName] = {
+            convertedData.push({
               name: sheetName,
               rows: rows,
-              index: Object.keys(convertedData).length // 添加索引以保持顺序
-            };
+              index: convertedData.length // 添加索引以保持顺序
+            });
           } else {
             message.warning(`工作表 ${sheetName} 没有有效数据，但已加载空表结构`);
             convertedData.push({
@@ -443,7 +443,15 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
 
       // 初次加入时接收服务端同步的完整表格内容
       socketRef.current.on('sync_data', ({ data }) => {
-        spreadsheetRef.current?.loadData(data);
+        if (!data || typeof data !== 'object') return;
+
+        const converted = Object.keys(data).map((sheetName, idx) => ({
+          name: sheetName,
+          index: idx,
+          ...data[sheetName],
+      }));
+
+        spreadsheetRef.current?.loadData(converted);
       });
 
       // 处理有用户加入协作

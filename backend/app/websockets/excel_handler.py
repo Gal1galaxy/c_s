@@ -26,7 +26,7 @@ def handle_join(data):
         print(f"Checking permission for user {user_id} on file {file_id}")  # 调试日志
         
         # 检查权限
-        if not permission_service.can_write(user_id, file_id):
+        if not permission_service.can_write(user_id, file_id, share_code):
             print(f"Permission denied for user {user_id} on file {file_id}")  # 调试日志
             emit('error', {'message': '没有编辑权限'})
             return

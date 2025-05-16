@@ -487,12 +487,20 @@ class FileService:
                             data = sheet_data[1:]
 
                             header_keys = list(header_row.keys())
-                            header_names = [header_row.get(k, '').strip() for k in header_keys]
+                            # 合法表头过滤：去除“列0”、“Unnamed”等默认或空表头
+                            header_names = []
+                            valid_keys = []
+                            
+                            for k in header_keys:
+                                name = header_row[k].strip() if isinstance(header_row[k], str) else ''
+                                if name and not name.startswith("列") and not name.startswith("Unnamed"):
+                                    header_names.append(name)
+                                    valid_keys.append(k)
     
-                            print("✅ 过滤后表头:", header_names)
+                            print("✅ 过滤后合法表头:", header_names)
     
                             rows = [
-                                [row.get(k, '') for k in header_keys]
+                                [row.get(k, '') for k in valid_keys]
                                 for row in data
                             ]
 

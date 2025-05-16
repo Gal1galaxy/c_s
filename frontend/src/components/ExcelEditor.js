@@ -449,7 +449,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
           name: sheetName,
           index: idx,
           ...data[sheetName]
-      });
+      }));
 
         spreadsheetRef.current?.loadData(converted);
       });

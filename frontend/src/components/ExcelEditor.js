@@ -189,40 +189,40 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
         const sheetName = sheetData.name;
         const rows = sheetData.rows || {};
 
-        // 获取表头（列标题）来自第 0 行
         const headerRow = rows[0]?.cells || {};
         const headerKeys = Object.keys(headerRow).map(k => parseInt(k)).sort((a, b) => a - b);
 
-        // 生成列索引 -> 表头名映射
         const headerDict = {};
-        let hasRealHeader = false;
-        
+        let validHeaderCount = 0;
+
         headerKeys.forEach((colIndex) => {
           const cellText = headerRow[colIndex]?.text?.trim() || '';
           headerDict[colIndex.toString()] = cellText;
-          const isInvalidHeader = /^(列\d+|Unnamed.*|\d+)$/.test(cellText);  //非法表头判断
+
+          // ✅ 改进后的非法表头判断：列0、Unnamed、纯数字或空白
+          const isInvalidHeader = /^(列\d+|Unnamed.*|\d+|\s*)$/.test(cellText);
           if (cellText !== '' && !isInvalidHeader) {
-            hasRealHeader = true; // 如果有非数字表头，视为真实表头
+            validHeaderCount += 1;
           }
         });
 
-        // 定义 content 数组
         const content = [];
 
-        if (hasRealHeader) {
-          content.push(headerDict); //合法表头才加入
-        }   
+        // ✅ 只有表头字段有效数量 ≥ 2 时才作为合法表头处理
+        if (validHeaderCount >= 2) {
+          content.push(headerDict);
+        }
 
-        // 处理数据行:从第 1 行开始提取内容，遍历数据行
+        // 处理数据行
         Object.keys(rows).forEach((rowIndexStr) => {
           const ri = parseInt(rowIndexStr, 10);
-          if (ri === 0) return;  // 跳过表头
+          if (ri === 0) return; // 跳过表头
 
           const row = rows[ri]?.cells || {};
           const rowData = {};
+
           headerKeys.forEach((colIndex) => {
             const headerKey = colIndex.toString();
-            const cell = row[colIndex];
             rowData[headerKey] = row[colIndex]?.text || '';
           });
 

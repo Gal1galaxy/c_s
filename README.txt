@@ -23,8 +23,8 @@ cloud-storage/
 │   │   │   └── log_service.py   # 日志服务
 │   │   └── utils/               # 工具函数
 │   │       ├── __init__.py
-│   │       ├── security.py      # 安全相关工具
-│   │       └── validators.py    # 数据验证工具
+│   │       ├── crpyto.py      # 安全相关工具
+│   │       └── auth.py    # 用户验证工具
 │   ├── migrations/              # 数据库迁移文件
 │   ├── storage/                 # 文件存储目录
 │   │   ├── uploads/            # 上传文件

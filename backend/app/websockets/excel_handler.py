@@ -283,7 +283,7 @@ def handle_sync_data(data):
 
         # 广播更新（给其他用户）
         emit('sync_data', {
-            'data': updated_data
+            'data': updated_data,
             'fromUserId': user_id
         }, room=room, include_self=False)
 

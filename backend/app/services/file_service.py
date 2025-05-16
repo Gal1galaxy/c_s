@@ -20,6 +20,8 @@ from pdf2image import convert_from_path  # 需要安装 pdf2image
 import fitz  # 需要安装 PyMuPDF
 import io
 from PIL import Image
+import pyexcel as pe  # 用于读取 .xls 文件
+
 
 class FileService:
     def __init__(self):
@@ -431,29 +433,49 @@ class FileService:
             raise
 ################2025.5.12更改def——handle_excel_file################
     def _handle_excel_file(self, file_path):
-        """处理 Excel 文件"""
+        """处理 Excel 文件（兼容 .xlsx 和 .xls）"""
         try:
-            extension = os.path.splitext(file_path)[1].lower() #明确指定引擎
-            engine = 'xlrd' if extension == '.xls' else 'openpyxl'
-
-            df_dict = pd.read_excel(file_path, sheet_name=None, engine=engine)
+            extension = os.path.splitext(file_path)[1].lower()
             content = {}
 
-            for sheet_name, df in df_dict.items():
-                if not df.empty:
-                    headers = df.columns.tolist()
-                    final_headers = [str(h).strip() if str(h).strip() and not str(h).strip().isdigit() else f'列{i}' for i, h in enumerate(headers)]
-                    print(f"✅ 读取表头：{headers}")
+            if extension == '.xls':
+                # 使用 pyexcel 读取 .xls 文件
+                book = pe.get_book(file_name=file_path)
+                for sheet in book:
+                    rows = sheet.to_array()
+                    if not rows:
+                        content[sheet.name] = []
+                        continue
 
-                    content[sheet_name] = [
-                        {str(i): h for i, h in enumerate(headers)}  # 表头行
+                    headers = rows[0]
+                    print(f"✅ 读取表头（xls）: {headers}")
+
+                    sheet_content = [
+                        {str(i): h for i, h in enumerate(headers)}
                     ] + [
-                        {str(i): str(row[h]) if pd.notna(row[h]) else '' for i, h in enumerate(headers)}
-                        for _, row in df.iterrows()
+                        {str(i): str(cell) if cell is not None else '' for i, cell in enumerate(row)}
+                        for row in rows[1:]
                     ]
-                else:
-                    content[sheet_name] = []
-    
+                    content[sheet.name] = sheet_content
+
+            else:
+                # 使用 pandas + openpyxl 读取 .xlsx 文件
+                df_dict = pd.read_excel(file_path, sheet_name=None, engine='openpyxl')
+                for sheet_name, df in df_dict.items():
+                    if not df.empty:
+                        headers = df.columns.tolist()
+                        print(f"✅ 读取表头（xlsx）: {headers}")
+
+                        sheet_content = [
+                            {str(i): h for i, h in enumerate(headers)}
+                        ] + [
+                            {str(i): str(row[h]) if pd.notna(row[h]) else '' for i, h in enumerate(headers)}
+                            for _, row in df.iterrows()
+                        ]
+                        content[sheet_name] = sheet_content
+                    else:
+                        content[sheet_name] = []
+
             return {
                 'content': content,
                 'file_type': 'Excel'
@@ -462,6 +484,7 @@ class FileService:
         except Exception as e:
             print(f"Error processing Excel file: {str(e)}")
             raise
+
 
    ################2025.5.12更改def——updatefilecontent################
     def update_file_content(self, file, content):

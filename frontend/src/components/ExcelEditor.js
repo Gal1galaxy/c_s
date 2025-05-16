@@ -442,7 +442,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
       //});
 
       // 初次加入时接收服务端同步的完整表格内容
-      socketRef.current.on('sync_data', ({ data }) => {
+      socketRef.current.on('sync_data', ({ data, fromUserId }) => {
         if (!data || typeof data !== 'object') return;
 
         if (fromUserId === user?.id) {

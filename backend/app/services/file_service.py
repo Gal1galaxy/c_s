@@ -519,7 +519,15 @@ class FileService:
                             data = sheet_data[1:]
 
                             header_keys = list(header_row.keys())
-                            header_names = [header_row[k].strip() or f"列{k}" for k in header_keys]
+                            seen = set()
+                            header_names = []
+                            for i, k in enumerate(header_keys):
+                                raw = header_row[k].strip() if isinstance(header_row[k], str) else str(header_row[k]).strip()
+                                col_name = raw if raw and not raw.startswith('列') and not raw.isdigit() else f"列{i}"
+                                while col_name in seen:
+                                    col_name += '_1'
+                                seen.add(col_name)
+                                header_names.append(col_name)
     
                             print("✅ 过滤后表头:", header_names)
     

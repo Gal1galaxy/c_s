@@ -305,15 +305,18 @@ def handle_save_request(data):
     }, room=room, namespace='/')
 
 @socketio.on('disconnect')
-def handle_disconnect():
+def handle_disconnect(sid):
     """处理连接断开"""
+    print(f"[disconnect] SID: {sid}")
     for file_id in list(file_editors.keys()):
         for user_id in list(file_editors[file_id].keys()):
-            if request.sid in socketio.rooms(user_id):
-                handle_leave({
-                    'fileId': file_id,
-                    'userId': user_id
-                })
+            # 使用Flask-SocketIO提供的sid判断逻辑改写（手动绑定不可靠）
+            # 所以不判断sid，而是直接触发leave_edit
+            handle_leave({
+                'fileId': file_id,
+                'userId': user_id
+            })
+
 
 # 定期清理不活跃的编辑者
 def cleanup_inactive_editors():

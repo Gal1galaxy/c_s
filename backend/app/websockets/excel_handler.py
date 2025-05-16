@@ -252,12 +252,12 @@ def handle_sync_data(data):
         room = f'file_{file_id}'
         print(f"[sync_data] from user {user_id} broadcasting to room: {room}")
 
-        # ✅ 如果数据为空，跳过处理
+        # 如果数据为空，跳过处理
         if updated_data is None:
             print(f"[sync_data] 收到空数据，跳过缓存更新 file_id={file_id}")
             return
 
-        # ✅ 初始化缓存结构
+        # 初始化缓存结构
         if file_id not in file_data:
             file_data[file_id] = {
                 'cells': {},
@@ -265,11 +265,11 @@ def handle_sync_data(data):
                 'sheets': {}
             }
 
-        # ✅ 更新完整结构
+        # 更新完整结构
         file_data[file_id]['sheets'] = updated_data
         file_data[file_id]['last_updated'] = datetime.utcnow()
 
-        # ✅ 重构 flat cells 缓存，确保刷新后能使用 loadData 渲染
+        #  重构 flat cells 缓存，确保刷新后能使用 loadData 渲染
         flat_cells = {}
         for sheet_name, sheet in updated_data.items():
             rows = sheet.get('rows', {})
@@ -279,10 +279,13 @@ def handle_sync_data(data):
                     cell_key = f"{sheet_name}_{row_idx}_{col_idx}"
                     flat_cells[cell_key] = cell.get('text', '')
 
-        file_data[file_id]['cells'] = flat_cells  # ✅用于 refresh 后加载数据
+        file_data[file_id]['cells'] = flat_cells  # 用于 refresh 后加载数据
 
-        # ✅ 广播更新（给其他用户）
-        emit('sync_data', {'data': updated_data}, room=room, include_self=False)
+        # 广播更新（给其他用户）
+        emit('sync_data', {
+            'data': updated_data
+            'fromUserId': user_id
+        }, room=room, include_self=False)
 
     except Exception as e:
         print(f"Error in handle_sync_data: {str(e)}")

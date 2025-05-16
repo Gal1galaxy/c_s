@@ -446,6 +446,12 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
           return;
         }
 
+        // 插入初始化完成判断逻辑(全局广播更新增加前置条件)
+        if (!isInitialLoadDone) {
+          console.log('[client] 表格尚未初始化完成，跳过 sync_data');
+          return;
+        }
+
         // ✅ 使用 spreadsheetRef.current.loadData 覆盖全量数据，确保格式、合并、样式一致
         try {
           spreadsheetRef.current?.loadData(data);

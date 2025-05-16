@@ -394,6 +394,45 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
         }
       });
 
+      // 接收单元格锁定事件
+      socketRef.current.on('cell_locked', ({ cell, userId, username }) => {
+        const key = `${cell.row}_${cell.col}`;
+        setLockedCells(prev => ({ ...prev, [key]: { userId, username } }));
+      });
+
+      // 接收单元格解锁事件
+      socketRef.current.on('cell_unlocked', ({ cell }) => {
+        const key = `${cell.row}_${cell.col}`;
+        setLockedCells(prev => {
+          const updated = { ...prev };
+          delete updated[key];
+          return updated;
+        });
+      });
+
+      // 接收其他用户的单元格内容更新
+      socketRef.current.on('cell_updated', ({ row, col, value }) => {
+        const sheet = spreadsheetRef.current?.sheet;
+        if (sheet) {
+          sheet.cellText(row, col, value);
+        }
+      });
+
+      // 初次加入时接收服务端同步的完整表格内容
+      socketRef.current.on('sync_data', ({ data }) => {
+        spreadsheetRef.current?.loadData(data);
+      });
+
+      // 处理有用户加入协作
+      socketRef.current.on('user_joined', ({ editors }) => {
+        setEditors(editors);
+      });
+
+      // 处理有用户离开协作
+      socketRef.current.on('user_left', ({ editors }) => {
+        setEditors(editors);
+      });
+
       // 监听用户加入
       socketRef.current.on('user_joined', ({ userId, username, editors: newEditors, canWrite: serverCanWrite, currentUser }) => {
         console.log('User joined event:', {

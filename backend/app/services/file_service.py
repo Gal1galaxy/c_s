@@ -433,7 +433,10 @@ class FileService:
     def _handle_excel_file(self, file_path):
         """处理 Excel 文件"""
         try:
-            df_dict = pd.read_excel(file_path, sheet_name=None, engine='openpyxl')  # 明确指定引擎
+            extension = os.path.splitext(file_path)[1].lower() #明确指定引擎
+            engine = 'xlrd' if extension == '.xls' else 'openpyxl'
+
+            df_dict = pd.read_excel(file_path, sheet_name=None, engine=engine)
             content = {}
 
             for sheet_name, df in df_dict.items():

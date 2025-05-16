@@ -349,7 +349,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
       }
 
       // 创建新连接
-      socketRef.current = io(process.env.REACT_APP_SOCKET_URL || 'http://http://47.108.78.58/', {
+      socketRef.current = io(process.env.REACT_APP_SOCKET_URL || 'http://47.108.78.58/', {
         transports: ['websocket'],
         upgrade: false,
         query: {

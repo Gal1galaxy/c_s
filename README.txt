@@ -1,7 +1,7 @@
 后端使用python，前端使用react.js，数据库使用sqlite。
 开发和运行环境是ubuntu 24.04。
 
-1、代码结构：
+1、项目tree：
 cloud-storage/
 ├── backend/
 │   ├── app/

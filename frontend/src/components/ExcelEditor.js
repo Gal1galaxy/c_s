@@ -64,13 +64,13 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
   };
 
   const loadExcelData = async () => {
+    const response = await axios.get(`/api/files/${fileId}/content`, {
+      params: { shareCode }
+    });
+    console.log('📦 接收到的后端数据:', response.data);
     try {
       setLoading(true);
       console.log('Loading file:', fileId, 'shareCode:', shareCode);
-      
-      const response = await axios.get(`/api/files/${fileId}/content`, {
-        params: { shareCode }
-      });
       
       console.log('Excel data response:', response.data);
       
@@ -88,7 +88,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
           console.log('Processing sheet:', sheetName);
           const sheetContent = sheetsData[sheetName];
           
-          if (Array.isArray(sheetContent) && sheetContent.length > 0) {
+          if (Array.isArray(sheetContent) && sheetContent.length >= 1 && Object.keys(sheetContent[0] || {}).length > 0) {
             // 获取所有列名
             const allColumns = new Set();
             sheetContent.forEach(row => {
@@ -127,6 +127,15 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
               name: sheetName,
               rows: rows,
               index: Object.keys(convertedData).length // 添加索引以保持顺序
+            });
+          } else {
+            message.warning(`工作表 ${sheetName} 没有有效数据，但已加载空表结构`);
+            convertedData.push({
+              name: sheetName,
+              rows: {
+                0: { cells: {} }
+              },
+              index: Object.keys(convertedData).length
             });
           }
         });

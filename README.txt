@@ -77,7 +77,9 @@ pip install -r backend/requirements.txt
 先运行后端：
 cd backend
 python run.py 
-这样会运行后端接口，默认监听本地5000端口，不要关闭这个终端，保持程序一直运行。
+这样会运行后端接口，默认监听本地5000端口，保持程序一直运行。
+
+服务器使用tmux命令运行后端，这样可以随时重连查看后端窗口
 
 运行前端：
 cd frontend

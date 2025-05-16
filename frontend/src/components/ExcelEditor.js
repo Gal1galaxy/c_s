@@ -463,13 +463,23 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
 
 
       // 处理有用户加入协作
-      socketRef.current.on('user_joined', ({ editors }) => {
-        setEditors(editors);
+      socketRef.current.on('user_joined', ({ userId, username, editors: newEditors, canWrite: serverCanWrite, currentUser }) => {
+        setEditors(newEditors);  // 更新本地协作用户列表
+        if (userId === user?.id) {
+        // 自己成功加入协作
+          setSocketReady(true);
+          message.success('成功加入编辑');
+        } else {
+          // 有其他用户加入协作
+          message.info(`${username || '用户'} 加入了编辑`);
+        }
+        console.log('User joined event:', { userId, username, serverCanWrite, currentUser });
       });
 
       // 处理有用户离开协作
-      socketRef.current.on('user_left', ({ editors }) => {
-        setEditors(editors);
+      socketRef.current.on('user_left', ({ userId, username, editors: newEditors }) => {
+        setEditors(newEditors);  // 更新本地协作用户列表
+        message.info(`${username} 离开了编辑`);
       });
 
       // 监听用户加入
@@ -663,30 +673,16 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
   // 添加一个初始化编辑器的函数
   const initializeSpreadsheet = () => {
     if (!containerRef.current || spreadsheetRef.current) return;
-
     const container = containerRef.current;
-    const containerWidth = container.offsetWidth;
-    const containerHeight = container.offsetHeight;
-
+    // 创建 x-spreadsheet 实例并设置模式、外观等选项
     spreadsheetRef.current = new Spreadsheet(container, {
-      mode: canWrite ? 'edit' : 'read',  // 根据权限设置模式
-      showToolbar: canWrite,  // 根据权限显示工具栏
+      mode: canWrite ? 'edit' : 'read',
+      showToolbar: canWrite,
       showGrid: true,
-      showContextmenu: canWrite,  // 根据权限显示右键菜单
-      view: {
-        height: () => containerHeight,
-        width: () => containerWidth,
-      },
-      row: {
-        len: 100,
-        height: 25,
-      },
-      col: {
-        len: 26,
-        width: 100,
-        indexWidth: 60,
-        minWidth: 60,
-      },
+      showContextmenu: canWrite,
+      view: { height: () => container.offsetHeight, width: () => container.offsetWidth },
+      row: { len: 100, height: 25 },
+      col: { len: 26, width: 100, indexWidth: 60, minWidth: 60 },
       style: {
         bgcolor: '#ffffff',
         align: 'left',
@@ -695,47 +691,32 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
         strike: false,
         underline: false,
         color: '#0a0a0a',
-        font: {
-          name: 'Helvetica',
-          size: 10,
-          bold: false,
-          italic: false,
-        },
-      },
-      // 直接在配置中设置事件处理器
-      /*onSelected: (cell, ri, ci) => {
-        if (canWrite) {
-          handleCellEditStart(ri, ci);
-        }
-      },
-      onCellEdited: (text, ri, ci) => {
-        handleCellEditEnd(ri, ci, { text });
-      }*/
+        font: { name: 'Helvetica', size: 10, bold: false, italic: false }
+      }
+      // （取消原有 onSelected/onCellEdited 内联配置，用统一事件绑定替代）
     });
 
+    // 绑定单元格选中事件：选中单元格时请求锁定该单元格
     spreadsheetRef.current.on('cell-selected', (cell, ri, ci) => {
       if (canWrite) {
         handleCellEditStart(ri, ci);
       }
     });
+    // 绑定单元格编辑完成事件：内容改动后解除锁定并通知后端更新
     spreadsheetRef.current.on('cell-edited', handleCellEditEnd);
 
-    //全局监听
-    spreadsheetRef.current.on('change', () => {
+    // **全局表格变更事件监听**：包括文本、样式、合并、拖拽填充等任何更改
+    spreadsheetRef.current.change((data) => {
       if (!canWrite || !isInitialLoadDone) return;
-      
-      const allData = spreadsheetRef.current.getData();
-
-      if (allData && Object.keys(allData).length > 0) {
-        socketRef.current?.emit('sync_data', {
-          fileId,
-          userId: user?.id,
-          shareCode,
-          fromUserId: user?.id,
-          data: allData  //同步整张表结构，包括 styles/merges 等
+      // 通过 Socket 实时广播整份工作簿数据以同步所有改动
+      socketRef.current?.emit('sync_data', {
+        fileId,
+        userId: user?.id,
+        shareCode,
+        fromUserId: user?.id,
+        data      // x-data-spreadsheet 返回的最新完整数据集
       });
-      console.log('[client] sync_data emitted with all data to sync formatting or merges');
-      }
+      console.log('[client] sync_data emitted (full workbook data) for real-time sync');
     });
 
     // 加载文件，并在完成后初始化 WebSocket

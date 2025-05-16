@@ -445,6 +445,8 @@ class FileService:
                 if not df_dict:
                     raise ValueError("Empty sheet dict returned by openpyxl")
                 for sheet_name, df in df_dict.items():
+                    print(f"📄 正在处理 sheet: {sheet_name} / {sheet.name}")
+                    print(f"✅ 表格行数: {df.shape[0] if isinstance(df, pd.DataFrame) else len(rows)}")
                     if not df.empty:
                         headers = [str(h).strip() for h in df.columns.tolist()]
                         print(f"✅ 读取表头（xlsx）: {headers}")

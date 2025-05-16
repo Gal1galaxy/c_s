@@ -185,6 +185,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
         
         headerKeys.forEach((colIndex) => {
           const cellText = headerRow[colIndex]?.text?.trim() || '';
+          headerDict[colIndex.toString()] = cellText;
           const isInvalidHeader = /^(列\d+|Unnamed.*|\d+)$/.test(cellText);  //非法表头判断
           headerDict[colIndex.toString()] = cellText;
           if (cellText !== '' && !isInvalidHeader) {

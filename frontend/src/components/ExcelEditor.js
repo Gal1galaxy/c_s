@@ -138,7 +138,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
               rows: {
                 0: { cells: {} }
               },
-              index: Object.keys(convertedData).length
+              index: convertedData.length
             });
           }
         });
@@ -448,7 +448,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
         const converted = Object.keys(data).map((sheetName, idx) => ({
           name: sheetName,
           index: idx,
-          ...data[sheetName],
+          ...data[sheetName]
       }));
 
         spreadsheetRef.current?.loadData(converted);

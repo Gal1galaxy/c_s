@@ -431,21 +431,15 @@ class FileService:
             raise
 ################2025.5.12更改def——handle_excel_file################
     def _handle_excel_file(self, file_path):
-        """处理 Excel 文件(兼容xlsx/xls)"""
+        """处理 Excel 文件"""
         try:
-            extension = os.path.splitext(file_path)[1].lower() #根据扩展名选择合适的解析引擎
-            if extension == '.xls':
-                engine = 'xlrd'  # 旧版Excel使用xlrd
-            else:
-                engine = 'openpyxl'  #默认使用openpyxl处理xlsx
-                
-            #读取所有工作表
-            df_dict = pd.read_excel(file_path, sheet_name=None, engine=engine)
+            df_dict = pd.read_excel(file_path, sheet_name=None, engine='openpyxl')  # 明确指定引擎
             content = {}
 
             for sheet_name, df in df_dict.items():
                 if not df.empty:
                     headers = df.columns.tolist()
+                    final_headers = [str(h).strip() if str(h).strip() and not str(h).strip().isdigit() else f'列{i}' for i, h in enumerate(headers)]
                     print(f"✅ 读取表头：{headers}")
 
                     content[sheet_name] = [
@@ -487,20 +481,12 @@ class FileService:
                             data = sheet_data[1:]
 
                             header_keys = list(header_row.keys())
-                            # 合法表头过滤：去除“列0”、“Unnamed”等默认或空表头
-                            header_names = []
-                            valid_keys = []
-                            
-                            for k in header_keys:
-                                name = header_row[k].strip() if isinstance(header_row[k], str) else ''
-                                if name and not name.startswith("列") and not name.startswith("Unnamed"):
-                                    header_names.append(name)
-                                    valid_keys.append(k)
+                            header_names = [header_row[k].strip() or f"列{k}" for k in header_keys]
     
-                            print("✅ 过滤后合法表头:", header_names)
+                            print("✅ 过滤后表头:", header_names)
     
                             rows = [
-                                [row.get(k, '') for k in valid_keys]
+                                [row.get(k, '') for k in header_keys]
                                 for row in data
                             ]
 

@@ -247,6 +247,10 @@ def handle_sync_data(data):
         room = f'file_{file_id}'
         print(f"[sync_data] from user {user_id} broadcasting to room: {room}")
 
+        if updated_data is None:
+            print(f"[sync_data] 收到空数据，跳过缓存更新 file_id={file_id}")
+            return
+
         # 更新缓存（可选）
         if file_id not in file_data:
             file_data[file_id] = {

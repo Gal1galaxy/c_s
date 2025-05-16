@@ -715,16 +715,18 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
     //全局监听
     spreadsheetRef.current.on('change', () => {
       if (!canWrite || !isInitialLoadDone) return;
-
+      
       const allData = spreadsheetRef.current.getData();
-      socketRef.current?.emit('sync_data', {
-        fileId,
-        userId: user?.id,
-        shareCode,
-        data: null
-      });
 
-      console.log('[client] sync_data emitted with no data to avoid overwrite');
+      if (allData && Object.keys(allData).length > 0) {
+        socketRef.current?.emit('sync_data', {
+          fileId,
+          userId: user?.id,
+          shareCode,
+          data: allData
+      });
+      console.log('[client] sync_data emitted with all data to avoid overwrite');
+      }
     });
 
     // 加载文件

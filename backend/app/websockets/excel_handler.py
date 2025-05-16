@@ -21,6 +21,7 @@ def handle_join(data):
         file_id = str(data.get('fileId'))
         user_id = str(data.get('userId'))
         username = data.get('username')
+        share_code = data.get('shareCode')
         
         print(f"Checking permission for user {user_id} on file {file_id}")  # 调试日志
         
@@ -144,6 +145,7 @@ def handle_unlock_cell(data):
     file_id = str(data.get('fileId'))
     user_id = str(data.get('userId'))
     cell = data.get('cell')
+    share_code = data.get('shareCode')
     
     room = f'file_{file_id}'
     cell_key = f"{cell['row']}_{cell['col']}"
@@ -238,8 +240,9 @@ def handle_save_request(data):
     """处理保存请求"""
     file_id = str(data.get('fileId'))
     user_id = str(data.get('userId'))
+    share_code = data.get('shareCode')
     
-    if not permission_service.can_write(user_id, file_id):
+    if not permission_service.can_write(user_id, file_id, share_code):
         emit('error', {'message': '没有保存权限'})
         return
         

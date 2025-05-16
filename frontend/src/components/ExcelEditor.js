@@ -445,6 +445,10 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
       socketRef.current.on('sync_data', ({ data }) => {
         if (!data || typeof data !== 'object') return;
 
+        if (fromUserId === user?.id) {
+          console.log('[client] 忽略自己发出的 sync_data，避免覆盖');
+          return;
+        }
         const converted = Object.keys(data).map((sheetName, idx) => ({
           name: sheetName,
           index: idx,
@@ -723,6 +727,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
           fileId,
           userId: user?.id,
           shareCode,
+          fromUserId: user?.id,
           data: allData
       });
       console.log('[client] sync_data emitted with all data to avoid overwrite');

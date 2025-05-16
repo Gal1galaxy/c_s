@@ -185,8 +185,9 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
         
         headerKeys.forEach((colIndex) => {
           const cellText = headerRow[colIndex]?.text?.trim() || '';
+          const isInvalidHeader = /^(列\d+|Unnamed.*|\d+)$/.test(cellText);  //非法表头判断
           headerDict[colIndex.toString()] = cellText;
-          if (cellText !== '' && isNaN(cellText)) {
+          if (cellText !== '' && !isInvalidHeader) {
             hasRealHeader = true; // 如果有非数字表头，视为真实表头
           }
         });
@@ -195,7 +196,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
         const content = [];
 
         if (hasRealHeader) {
-          content.push(headerDict); //  只有真实表头才加入
+          content.push(headerDict); //合法表头才加入
         }   
 
         // 处理数据行:从第 1 行开始提取内容，遍历数据行

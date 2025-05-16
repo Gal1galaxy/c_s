@@ -82,7 +82,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
       
       if (response.data && response.data.content) {
         const sheetsData = response.data.content;
-        const convertedData = [];
+        const convertedData = {};
         
         // 处理每个工作表
         Object.keys(sheetsData).sort().forEach((sheetName) => {
@@ -124,7 +124,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
             });
             
             // 添加工作表
-            convertedData.push({
+            convertedData[sheetName] = {
               name: sheetName,
               rows: rows,
               index: Object.keys(convertedData).length // 添加索引以保持顺序

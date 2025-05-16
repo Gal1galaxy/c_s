@@ -128,7 +128,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
               name: sheetName,
               rows: rows,
               index: Object.keys(convertedData).length // 添加索引以保持顺序
-            });
+            };
           } else {
             message.warning(`工作表 ${sheetName} 没有有效数据，但已加载空表结构`);
             convertedData.push({

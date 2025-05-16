@@ -219,7 +219,7 @@ def handle_cell_updated(data):
             'data': {sheet_name: all_data},
             'fromUserId': user_id
         }, room=f'file_{file_id}', include_self=False)
-    '''   
+        '''   
         # 广播更新给其他用户
         emit('cell_updated', {
             'userId': user_id,

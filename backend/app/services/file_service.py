@@ -437,12 +437,14 @@ class FileService:
         try:
             content = {}
 
-            # 强制使用 openpyxl 读取（即使文件名是 .xls，只要内容实际是 xlsx）
+            # 使用 openpyxl 读取（即使文件名是 .xls，只要内容实际是 xlsx）
             try:
                 df_dict = pd.read_excel(file_path, sheet_name=None, engine='openpyxl')
+                if not df_dict:
+                    raise ValueError("Empty sheet dict returned by openpyxl")
                 for sheet_name, df in df_dict.items():
                     if not df.empty:
-                        headers = df.columns.tolist()
+                        headers = [str(h).strip() for h in df.columns.tolist()]
                         print(f"✅ 读取表头（xlsx）: {headers}")
     
                         sheet_content = [
@@ -462,6 +464,7 @@ class FileService:
 
             except Exception as openpyxl_error:
                 print(f"[Fallback] openpyxl failed: {openpyxl_error}")
+                
                 # fallback 尝试使用 pyexcel
                 try:
                     book = pe.get_book(file_name=file_path)
@@ -471,7 +474,7 @@ class FileService:
                             content[sheet.name] = []
                             continue
 
-                        headers = rows[0]
+                        headers = [str(h).strip() for h in rows[0]]
                         print(f"✅ 读取表头（xls）: {headers}")
 
                         sheet_content = [

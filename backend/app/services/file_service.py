@@ -21,6 +21,8 @@ import fitz  # 需要安装 PyMuPDF
 import io
 from PIL import Image
 import pyexcel as pe  # 用于读取 .xls 文件
+import re
+
 
 
 class FileService:
@@ -445,6 +447,11 @@ class FileService:
                 for sheet_name, df in df_dict.items():
                     if not df.empty:
                         headers = [str(h).strip() for h in df.columns.tolist()]
+                        is_fake_header = all(re.match(r"^(列\d+|Unnamed.*|\d+)?$", h) for h in headers)
+                        if is_fake_header:
+                            print(f"⚠️ 检测到伪表头，跳过该工作表: {sheet_name}")
+                            content[sheet_name] = []
+                            continue
                         print(f"✅ 读取表头（xlsx）: {headers}")
     
                         sheet_content = [
@@ -475,6 +482,11 @@ class FileService:
                             continue
 
                         headers = [str(h).strip() for h in rows[0]]
+                        is_fake_header = all(re.match(r"^(列\d+|Unnamed.*|\d+)?$", h) for h in headers)
+                        if is_fake_header:
+                            print(f"⚠️ 检测到伪表头（.xls），跳过该工作表: {sheet.name}")
+                            content[sheet.name] = []
+                            continue
                         print(f"✅ 读取表头（xls）: {headers}")
 
                         sheet_content = [

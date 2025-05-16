@@ -10,6 +10,9 @@ import { io } from 'socket.io-client';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 
+
+const [socketReady, setSocketReady] = useState(false);
+
 const ExcelEditor = ({ fileId, fileInfo }) => {
   const { user } = useAuth();
   const containerRef = useRef(null);
@@ -249,7 +252,10 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
 
   // 添加单元格编辑处理函数
   const handleCellEditStart = (row, col) => {
-    if (!canWrite) return false;
+    if (!canWrite || !socketReady) {
+      console.log('WebSocket 尚未准备好，取消编辑');
+      return;
+    }
     
     const cell = { row, col };
     console.log('Cell edit start:', cell);
@@ -383,13 +389,15 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
         console.log('Socket connected');
         
         // 加入编辑房间
-        socketRef.current.emit('join_edit', {
-          fileId,
-          userId: user?.id,
-          username: user?.username,
-          shareCode: shareCode
+        setTimeout(() => {
+          socketRef.current.emit('join_edit', {
+            fileId,
+            userId: user?.id,
+            username: user?.username,
+            shareCode: shareCode
+          });
+        }, 300);
         });
-      });
 
       socketRef.current.on('connect_error', (error) => {
         console.error('Socket connection error:', error);
@@ -450,6 +458,13 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
 
       // 监听用户加入
       socketRef.current.on('user_joined', ({ userId, username, editors: newEditors, canWrite: serverCanWrite, currentUser }) => {
+        setEditors(newEditors);
+        if (userId === user?.id) {
+          message.success('成功加入编辑');
+          setSocketReady(true); // 设置 socket 准备完成
+        } else {
+          message.info(`${username || '用户'} 加入了编辑`);
+        }
         console.log('User joined event:', {
           userId,
           username,

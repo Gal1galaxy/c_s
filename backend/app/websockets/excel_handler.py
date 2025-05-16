@@ -105,6 +105,11 @@ def handle_lock_cell(data):
         
     room = f'file_{file_id}'
     cell_key = f"{cell['row']}_{cell['col']}"
+
+    # 防止 KeyError 闪退
+    if file_id not in file_editors or user_id not in file_editors[file_id]:
+        print(f"[lock_cell] 用户 {user_id} 不在 file_editors 中，忽略锁定请求")
+        return
     
     # 检查单元格是否已被锁定
     if file_id in cell_locks and cell_key in cell_locks[file_id]:

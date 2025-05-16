@@ -181,7 +181,6 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
 
         // 生成列索引 -> 表头名映射
         const headerDict = {};
-        let hasRealHeader = false;
 
         //判断是否存在真实表头（只要存在非空文本）
         const hasRealHeader = headerKeys.some((colIndex) => {

@@ -571,7 +571,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
 
       socketRef.current?.emit('save_request', {
         fileId,
-        userId: user.id
+        userId: user.id,
         shareCode: shareCode
       });
 

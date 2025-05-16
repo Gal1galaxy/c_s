@@ -18,6 +18,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
   const [editors, setEditors] = useState({});
   const [lockedCells, setLockedCells] = useState({});
   const [canWrite, setCanWrite] = useState(true);  // 添加编辑权限状态
+  const [isInitialLoadDone, setIsInitialLoadDone] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const shareCode = new URLSearchParams(location.search).get('shareCode');
@@ -150,6 +151,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
             //spreadsheetRef.current.sheet.activeSheet = convertedData[0].name;
           }
           message.success('文件加载成功');
+          setIsInitialLoadDone(true);
         } else {
           throw new Error('没有有效的工作表数据');
         }
@@ -689,7 +691,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
 
     //全局监听
     spreadsheetRef.current.on('change', () => {
-      if (!canWrite) return;
+      if (!canWrite || !isInitialLoadDone) return;
 
       const allData = spreadsheetRef.current.getData();
       socketRef.current?.emit('sync_data', {

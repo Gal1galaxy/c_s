@@ -445,7 +445,12 @@ class FileService:
                 for sheet_name, df in df_dict.items():
                     print(f"📄 正在处理 sheet: {sheet_name}")
                     if df.empty:
-                        content[sheet_name] = []
+                        headers = [str(h).strip() for h in df.columns.tolist()]
+                        print(f"✅ 读取空表的表头（xlsx）: {headers}")
+                        sheet_content = [
+                            {str(i): h for i, h in enumerate(headers)}
+                        ]
+                        content[sheet_name] = sheet_content
                         continue
 
                     headers = [str(h).strip() for h in df.columns.tolist()]
@@ -514,35 +519,53 @@ class FileService:
                     writer = pd.ExcelWriter(temp_path, engine='openpyxl')  # 明确指定 openpyxl
                     for sheet_name, sheet_data in content.items():
                         print(f"Sheet: {sheet_name}: {sheet_data}")
-    
-                        if len(sheet_data) > 0:
-                            header_row = sheet_data[0]  # 表头
-                            data = sheet_data[1:]
 
-                            header_keys = list(header_row.keys())
-                            seen = set()
-                            header_names = []
-                            for i, k in enumerate(header_keys):
-                                raw = header_row[k].strip() if isinstance(header_row[k], str) else str(header_row[k]).strip()
-                                col_name = raw if raw else f"列{i}"
-                                while col_name in seen:
-                                    col_name += '_1'
-                                seen.add(col_name)
-                                header_names.append(col_name)
-    
-                            print("✅ 过滤后表头:", header_names)
-    
-                            rows = [
-                                [row.get(k, '') for k in header_keys]
-                                for row in data
-                            ]
+                        if not sheet_data:
+                            print(f"[警告] Sheet {sheet_name} 内容为空，已跳过写入")
+                            continue
 
-                            df = pd.DataFrame(rows, columns=header_names)
-                            print("✅ DataFrame:\n", df.head())
+                        header_row = sheet_data[0]
+                        data = sheet_data[1:]
 
-                            df.to_excel(writer, sheet_name=sheet_name, index=False)
+                        if not isinstance(header_row, dict):
+                            print(f"[错误] 表头格式不合法（不是 dict），跳过写入 Sheet {sheet_name}")
+                            continue
 
-                            print(f"✅ Written sheet: {sheet_name} with columns: {df.columns}")
+                        header_keys = list(header_row.keys())
+                        seen = set()
+                        header_names = []
+                        valid_header_count = 0
+
+                        for i, k in enumerate(header_keys):
+                            raw = header_row[k].strip() if isinstance(header_row[k], str) else str(header_row[k]).strip()
+                            col_name = raw if raw else f"列{i}"
+
+                            # 记录是否为有效列名（非占位符）
+                            if not re.match(r'^(列\d+|Unnamed.*|\d+|\s*)$', col_name):
+                                valid_header_count += 1
+
+                            while col_name in seen:
+                                col_name += '_1'
+                            seen.add(col_name)
+                            header_names.append(col_name)
+
+                        # ✅ 拦截非法表头：如果有效字段数不足 2，跳过写入
+                        if valid_header_count < 2:
+                            print(f"[警告] Sheet {sheet_name} 表头无效（有效字段数为 {valid_header_count}），跳过写入")
+                            continue
+
+                        print("✅ 过滤后表头:", header_names)
+
+                        rows = [
+                            [row.get(k, '') for k in header_keys]
+                            for row in data
+                        ]
+
+                        df = pd.DataFrame(rows, columns=header_names)
+                        print("✅ DataFrame:\n", df.head())
+
+                        df.to_excel(writer, sheet_name=sheet_name, index=False)
+                        print(f"✅ Written sheet: {sheet_name} with columns: {df.columns}")
     
                     writer.close()
 

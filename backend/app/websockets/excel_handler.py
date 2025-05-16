@@ -212,7 +212,14 @@ def handle_cell_updated(data):
 
         # latest缓存整张表的结构
         file_data[file_id]['sheets'][sheet_name] = all_data
-        
+
+     
+        # 广播更新给其他用户，更改为广播整张工作表（结构+样式+数据）
+        emit('sync_data', {
+            'data': {sheet_name: all_data},
+            'fromUserId': user_id
+        }, room=f'file_{file_id}', include_self=False)
+    '''   
         # 广播更新给其他用户
         emit('cell_updated', {
             'userId': user_id,
@@ -222,6 +229,8 @@ def handle_cell_updated(data):
             'value': value,
             'allData': all_data
         }, room=f'file_{file_id}', include_self=False)
+
+        '''
         
         print(f"Broadcasted cell update to room file_{file_id}")  # 添加广播日志
         

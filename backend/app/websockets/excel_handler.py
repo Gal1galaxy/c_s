@@ -191,6 +191,22 @@ def handle_cell_updated(data):
         room = f'file_{file_id}'
         room_size = len(socketio.server.manager.rooms.get(f'/{room}', {}))
         print(f"Room {room} has {room_size} connected clients")  # 添加房间状态日志
+
+        # 初始化file_data[file_id]结构
+        if file_id not in file_data:
+            file_data[file_id] = {
+                'cells': {},           # 缓存每个 cell 的值
+                'last_updated': datetime.utcnow(),
+                'sheets': {}           # 缓存完整 sheet 结构
+            }
+
+        # 写入单个cell值到缓存
+        cell_key = f"{sheet_name}_{row}_{col}"
+        file_data[file_id]['cells'][cell_key] = value
+        file_data[file_id]['last_updated'] = datetime.utcnow()
+
+        # latest缓存整张表的结构
+        file_data[file_id]['sheets'][sheet_name] = all_data
         
         # 广播更新给其他用户
         emit('cell_updated', {

@@ -431,14 +431,20 @@ class FileService:
             raise
 ################2025.5.12更改def——handle_excel_file################
     def _handle_excel_file(self, file_path):
-        """处理 Excel 文件"""
+        """处理 Excel 文件(兼容xlsx/xls)"""
         try:
-            df_dict = pd.read_excel(file_path, sheet_name=None, engine='openpyxl')  # 明确指定引擎
+            extension = os.path.splitext(file_path)[1].lower() #根据扩展名选择合适的解析引擎
+            if extension == '.xls':
+                engine = 'xlrd'  # 旧版Excel使用xlrd
+            else:
+                engine = 'openpyxl'  #默认使用openpyxl处理xlsx
+                
+            #读取所有工作表
+            df_dict = pd.read_excel(file_path, sheet_name=None, engine=engine)
             content = {}
 
             for sheet_name, df in df_dict.items():
                 if not df.empty:
-                    headers = df.columns.tolist()
                     headers = df.columns.tolist()
                     print(f"✅ 读取表头：{headers}")
 

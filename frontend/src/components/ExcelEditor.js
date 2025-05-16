@@ -67,94 +67,85 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
   };
 
   const loadExcelData = async () => {
-    const response = await axios.get(`/api/files/${fileId}/content`, {
-      params: { shareCode }
-    });
-    console.log('📦 接收到的后端数据:', response.data);
     try {
       setLoading(true);
-      console.log('Loading file:', fileId, 'shareCode:', shareCode);
-      
-      console.log('Excel data response:', response.data);
-      
-      // 设置编辑权限
+      const response = await axios.get(`/api/files/${fileId}/content`, {
+        params: { shareCode }
+      });
+
+      console.log('📦 接收到的后端数据:', response.data);
+
       const hasWritePermission = response.data.can_write;
       console.log('Setting initial write permission:', hasWritePermission);
       setCanWrite(!!hasWritePermission);
-      
+
       if (response.data && response.data.content) {
         const sheetsData = response.data.content;
         const convertedData = [];
-        
-        // 处理每个工作表
-        Object.keys(sheetsData).sort().forEach((sheetName) => {
+
+        // ✅ 保持原始工作表顺序：使用 Object.entries 而不是 sort
+        Object.entries(sheetsData).forEach(([sheetName, sheetContent], idx) => {
           console.log('Processing sheet:', sheetName);
-          const sheetContent = sheetsData[sheetName];
-          
-          if (Array.isArray(sheetContent)) {
-            // 获取所有列名
-            let columns = [];
-            if (sheetContent.length > 0) {
-              const headerRow = sheetContent[0];
-              columns = Object.keys(headerRow);
-            }
-            
-            // 创建工作表数据
-            const rows = {};
-            
-            // 添加表头行
+
+          const rows = {};
+
+          if (Array.isArray(sheetContent) && sheetContent.length > 0) {
+            const headerRow = sheetContent[0];
+            const columns = Object.keys(headerRow);
+
+            // ✅ 表头行 - 使用列的值作为名称
             rows[0] = {
               cells: columns.reduce((acc, col, index) => {
-                acc[index] = { text: col };
+                acc[index] = { text: headerRow[col] || '' };
                 return acc;
               }, {})
             };
-            
-            // 添加数据行
-            sheetContent.forEach((rowData, rowIndex) => {
+
+            // ✅ 添加数据行，跳过表头（第 0 行）
+            sheetContent.slice(1).forEach((rowData, rowIndex) => {
               const cells = {};
               columns.forEach((col, colIndex) => {
                 const value = rowData[col];
-                cells[colIndex] = { 
-                  text: (value === null || value === undefined || Number.isNaN(value))
-                    ? ''
-                    : value.toString()
+                cells[colIndex] = {
+                  text:
+                    value === null || value === undefined || Number.isNaN(value)
+                      ? ''
+                      : value.toString()
                 };
               });
-              
-              rows[rowIndex + 1] = { cells };
-            });
-            
-            // 添加工作表
-            convertedData.push({
-              name: sheetName,
-              rows: rows,
-              index: convertedData.length // 添加索引以保持顺序
+
+              rows[rowIndex + 1] = { cells }; // rowIndex+1 因为 rows[0] 是表头
             });
           } else {
+            // 空 sheet，初始化空结构
             message.warning(`工作表 ${sheetName} 没有有效数据，但已加载空表结构`);
-            convertedData.push({
-              name: sheetName,
-              rows: {
-                0: { cells: {} }
-              },
-              index: convertedData.length
-            });
+            rows[0] = { cells: {} };
           }
+
+          convertedData.push({
+            name: sheetName,
+            rows: rows,
+            index: idx // ✅ 用原始顺序编号
+          });
         });
-        
+
         console.log('Converted data:', convertedData);
-        
-        if (Object.keys(convertedData).length > 0) {
-          // 重新初始化电子表格
+
+        if (convertedData.length > 0) {
           if (spreadsheetRef.current) {
             spreadsheetRef.current.loadData(convertedData);
-            // 切换到第一个工作表
-            //spreadsheetRef.current.sheet.activeSheet = convertedData[0].name;
-            console.log('Converted data:', convertedData); 
           }
           message.success('文件加载成功');
           setIsInitialLoadDone(true);
+
+          // ✅ 加载完成后，仅在具有编辑权限时连接协作 socket
+          if (hasWritePermission) {
+            initializeSocket();
+          } else {
+            message.info('当前为只读模式，不参与协作编辑');
+          }
+
+          return true;
         } else {
           throw new Error('没有有效的工作表数据');
         }
@@ -166,8 +157,9 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
       console.error('Load Excel error:', error);
       message.error(error.response?.data?.error || '加载文件内容失败');
       if (error.response?.status === 403) {
-        navigate('/files');  // 如果没有权限，返回文件列表
+        navigate('/files'); // 无权限时跳转
       }
+      return false;
     } finally {
       setLoading(false);
     }
@@ -405,7 +397,11 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
 
       socketRef.current.on('error', (error) => {
         console.error('Socket error:', error);
-        message.error('WebSocket 连接错误');
+        if (error?.message?.includes('没有编辑权限')) {
+          message.info('您没有该文件的编辑权限，已进入只读模式');
+        } else {  
+          message.error('WebSocket 连接错误');
+        }
       });
 
       // 断开连接事件处理
@@ -734,11 +730,10 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
       }
     });
 
-    // 加载文件
-    loadExcelData();
-
-    // 初始化 WebSocket
-    initializeSocket();
+    // 加载文件，并在完成后初始化 WebSocket
+    loadExcelData().then(() => {
+      initializeSocket();
+    });
   };
 
   // 修改 useEffect

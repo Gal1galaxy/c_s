@@ -415,12 +415,12 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
       });
 
       // 接收其他用户的单元格内容更新
-      socketRef.current.on('cell_updated', ({ row, col, value }) => {
-        const sheet = spreadsheetRef.current?.sheet;
-        if (sheet) {
-          sheet.cellText(row, col, value);
-        }
-      });
+      //socketRef.current.on('cell_updated', ({ row, col, value }) => {
+        //const sheet = spreadsheetRef.current?.sheet;
+        //if (sheet) {
+          //sheet.cellText(row, col, value);
+        //}
+      //});
 
       // 初次加入时接收服务端同步的完整表格内容
       socketRef.current.on('sync_data', ({ data }) => {

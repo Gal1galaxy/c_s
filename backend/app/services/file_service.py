@@ -481,7 +481,7 @@ class FileService:
                             data = sheet_data[1:]
 
                             header_keys = list(header_row.keys())
-                            header_names = [header_row[k].strip() or f"列{k}" for k in header_keys]
+                            header_names = [header_row.get(k, '').strip() for k in header_keys]
     
                             print("✅ 过滤后表头:", header_names)
     

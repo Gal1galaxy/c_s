@@ -698,10 +698,10 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
         fileId,
         userId: user?.id,
         shareCode,
-        data: allData
+        data: null
       });
 
-      console.log('[client] sync_data emitted due to change');
+      console.log('[client] sync_data emitted with no data to avoid overwrite');
     });
 
     // 加载文件

@@ -179,13 +179,18 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
         const headerRow = rows[0]?.cells || {};
         const headerKeys = Object.keys(headerRow).map(k => parseInt(k)).sort((a, b) => a - b);
 
+        // 判断是否存在真实表头（非“列0”、“Unnamed”等）
+        let hasRealHeader = false;
         // 生成列索引 -> 表头名映射
         const headerDict = {};
 
-        //判断是否存在真实表头（只要存在非空文本）
-        const hasRealHeader = headerKeys.some((colIndex) => {
+        //判断是否存在真实表头
+        headerKeys.forEach((colIndex) => {
           const cellText = headerRow[colIndex]?.text?.trim() || '';
-          return cellText !== '';
+          headerDict[colIndex.toString()] = cellText;
+          if (cellText !== '' && !/^列\d+$/.test(cellText) && !/^Unnamed/.test(cellText)) {
+            hasRealHeader = true;
+          }
         });
 
         headerKeys.forEach((colIndex) => {

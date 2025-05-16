@@ -151,6 +151,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
             spreadsheetRef.current.loadData(convertedData);
             // 切换到第一个工作表
             //spreadsheetRef.current.sheet.activeSheet = convertedData[0].name;
+            console.log('Converted data:', convertedData); 
           }
           message.success('文件加载成功');
           setIsInitialLoadDone(true);
@@ -170,7 +171,6 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
     } finally {
       setLoading(false);
     }
-    console.log('最终传入 loadData 的数据结构:', JSON.stringify(convertedData, null, 2));
   };
 
   const handleSave = async () => {

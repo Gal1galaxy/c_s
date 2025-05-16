@@ -524,7 +524,7 @@ class FileService:
                             header_names = []
                             for i, k in enumerate(header_keys):
                                 raw = header_row[k].strip() if isinstance(header_row[k], str) else str(header_row[k]).strip()
-                                col_name = raw if raw and not raw.startswith('列') and not raw.isdigit() else f"列{i}"
+                                col_name = raw if raw else f"列{i}"
                                 while col_name in seen:
                                     col_name += '_1'
                                 seen.add(col_name)

@@ -170,6 +170,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
     } finally {
       setLoading(false);
     }
+    console.log('最终传入 loadData 的数据结构:', JSON.stringify(convertedData, null, 2));
   };
 
   const handleSave = async () => {

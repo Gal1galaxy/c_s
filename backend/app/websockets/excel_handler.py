@@ -8,6 +8,8 @@ from app.services.file_service import FileService
 
 permission_service = PermissionService()
 file_service = FileService()
+def check_write_permission(user_id, file_id, share_code=None):
+    return permission_service.can_write(user_id, file_id, share_code)
 
 # 存储文件编辑状态
 file_editors = {}  # {file_id: {user_id: {'username': username, 'last_active': timestamp}}}

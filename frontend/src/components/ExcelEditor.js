@@ -11,8 +11,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 
-const [socketReady, setSocketReady] = useState(false);
-
 const ExcelEditor = ({ fileId, fileInfo }) => {
   const { user } = useAuth();
   const containerRef = useRef(null);
@@ -26,6 +24,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
   const location = useLocation();
   const shareCode = new URLSearchParams(location.search).get('shareCode');
   const [loading, setLoading] = useState(false);
+  const [socketReady, setSocketReady] = useState(false);
 
   // 将 Excel 数据转换为 x-spreadsheet 格式
   const excelToData = (workbook) => {

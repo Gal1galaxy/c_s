@@ -179,23 +179,17 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
         const headerRow = rows[0]?.cells || {};
         const headerKeys = Object.keys(headerRow).map(k => parseInt(k)).sort((a, b) => a - b);
 
-        // 判断是否存在真实表头（非“列0”、“Unnamed”等）
-        let hasRealHeader = false;
         // 生成列索引 -> 表头名映射
         const headerDict = {};
-
-        //判断是否存在真实表头
+        let hasRealHeader = false;
+        
         headerKeys.forEach((colIndex) => {
           const cellText = headerRow[colIndex]?.text?.trim() || '';
           headerDict[colIndex.toString()] = cellText;
-          if (cellText !== '' && !/^列\d+$/.test(cellText) && !/^Unnamed/.test(cellText)) {
-            hasRealHeader = true;
+          const isInvalidHeader = /^(列\d+|Unnamed.*|\d+)$/.test(cellText);  //非法表头判断
+          if (cellText !== '' && !isInvalidHeader) {
+            hasRealHeader = true; // 如果有非数字表头，视为真实表头
           }
-        });
-
-        headerKeys.forEach((colIndex) => {
-          const cellText = headerRow[colIndex]?.text?.trim() || '';
-          headerDict[colIndex.toString()] = cellText;
         });
 
         // 定义 content 数组

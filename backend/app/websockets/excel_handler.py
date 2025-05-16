@@ -27,12 +27,13 @@ def handle_join(data):
     if not user_id or not file_id:
         emit('error', {'message': '参数缺失'})
         return
+
     if not check_write_permission(user_id, file_id, share_code):
         emit('error', {'message': '没有编辑权限'})
         return
 
     join_room(room)
-    # 将用户加入协作列表
+
     if file_id not in file_editors:
         file_editors[file_id] = {}
     file_editors[file_id][user_id] = {
@@ -41,22 +42,22 @@ def handle_join(data):
         'sid': request.sid
     }
 
-    # 广播当前协作用户列表给房间内所有用户（包含新加入者自身）
     emit('user_joined', {
         'userId': user_id,
         'username': username,
-        'editors': {uid: info['username'] for uid, info in file_editors[file_id].items()},
+        'editors': {
+            uid: editor['username'] for uid, editor in file_editors[file_id].items()
+        },
         'canWrite': True,
         'currentUser': user_id
-    }, room=room)  # 移除了 include_self=False，使新用户也接收该事件
+    }, room=room, include_self=False)
 
-    # 将当前表格数据发送给新加入的用户进行同步（如果有缓存的协作更新）
+    # ✅ 发送缓存中的完整表格数据给当前用户（避免用 file_data[file_id]['cells']）
     if file_id in file_data and 'sheets' in file_data[file_id]:
         emit('sync_data', {
             'data': file_data[file_id]['sheets'],
             'fromUserId': user_id
         }, to=request.sid)
-
 
 
 @socketio.on('leave_edit')
@@ -211,14 +212,7 @@ def handle_cell_updated(data):
 
         # latest缓存整张表的结构
         file_data[file_id]['sheets'][sheet_name] = all_data
-
-     
-        # 广播更新给其他用户，更改为广播整张工作表（结构+样式+数据）
-        emit('sync_data', {
-            'data': {sheet_name: all_data},
-            'fromUserId': user_id
-        }, room=f'file_{file_id}', include_self=False)
-        '''   
+        
         # 广播更新给其他用户
         emit('cell_updated', {
             'userId': user_id,
@@ -228,8 +222,6 @@ def handle_cell_updated(data):
             'value': value,
             'allData': all_data
         }, room=f'file_{file_id}', include_self=False)
-
-        '''
         
         print(f"Broadcasted cell update to room file_{file_id}")  # 添加广播日志
         

@@ -554,9 +554,17 @@ class FileService:
     
             file.file_size = os.path.getsize(file.file_path)
             file.updated_at = datetime.utcnow()
-            if file.filename.lower().endswith(('.xlsx', '.xls')):
-                file.file_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            #储存为.xlsx,并更新文件名
+            if file.filename.lower().endswith('.xls'):
+                new_filename = file.filename[:-4] + '.xlsx'
+                new_path = os.path.join(os.path.dirname(file.file_path), new_filename)
 
+                os.rename(file.file_path, new_path)  # 重命名加密后文件
+                file.file_path = new_path
+                file.filename = new_filename
+
+            #统一设置文件类型为openxml格式
+            file.file_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             db.session.commit()
             print(f"File updated successfully: {file.filename}")
 

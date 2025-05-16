@@ -254,7 +254,9 @@ def handle_sync_data(data):
                 'last_updated': datetime.utcnow(),
                 'sheets': {}
             }
-        file_data[file_id]['sheets'] = updated_data
+        for sheet_name, sheet_content in updated_data.items():
+            file_data[file_id]['sheets'][sheet_name] = sheet_content
+            
         file_data[file_id]['last_updated'] = datetime.utcnow()
 
         # 广播给除发送者外的所有人

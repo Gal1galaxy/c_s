@@ -88,7 +88,7 @@ const ExcelEditor = ({ fileId, fileInfo }) => {
           console.log('Processing sheet:', sheetName);
           const sheetContent = sheetsData[sheetName];
           
-          if (Array.isArray(sheetContent) && sheetContent.length >= 1 && Object.keys(sheetContent[0] || {}).length > 0) {
+          if (Array.isArray(sheetContent)) {
             // 获取所有列名
             const allColumns = new Set();
             sheetContent.forEach(row => {

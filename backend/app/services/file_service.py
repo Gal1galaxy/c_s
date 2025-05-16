@@ -433,39 +433,18 @@ class FileService:
             raise
 ################2025.5.12更改def——handle_excel_file################
     def _handle_excel_file(self, file_path):
-        """处理 Excel 文件（兼容 .xlsx 和 .xls）"""
+        """处理 Excel 文件（兼容 .xlsx 和 .xls，优先以内容判断）"""
         try:
-            extension = os.path.splitext(file_path)[1].lower()
             content = {}
 
-            if extension == '.xls':
-                # 使用 pyexcel 读取 .xls 文件
-                book = pe.get_book(file_name=file_path)
-                for sheet in book:
-                    rows = sheet.to_array()
-                    if not rows:
-                        content[sheet.name] = []
-                        continue
-
-                    headers = rows[0]
-                    print(f"✅ 读取表头（xls）: {headers}")
-
-                    sheet_content = [
-                        {str(i): h for i, h in enumerate(headers)}
-                    ] + [
-                        {str(i): str(cell) if cell is not None else '' for i, cell in enumerate(row)}
-                        for row in rows[1:]
-                    ]
-                    content[sheet.name] = sheet_content
-
-            else:
-                # 使用 pandas + openpyxl 读取 .xlsx 文件
+            # 强制使用 openpyxl 读取（即使文件名是 .xls，只要内容实际是 xlsx）
+            try:
                 df_dict = pd.read_excel(file_path, sheet_name=None, engine='openpyxl')
                 for sheet_name, df in df_dict.items():
                     if not df.empty:
                         headers = df.columns.tolist()
                         print(f"✅ 读取表头（xlsx）: {headers}")
-
+    
                         sheet_content = [
                             {str(i): h for i, h in enumerate(headers)}
                         ] + [
@@ -475,16 +454,46 @@ class FileService:
                         content[sheet_name] = sheet_content
                     else:
                         content[sheet_name] = []
+    
+                return {
+                    'content': content,
+                    'file_type': 'Excel'
+                }
 
-            return {
-                'content': content,
-                'file_type': 'Excel'
-            }
+            except Exception as openpyxl_error:
+                print(f"[Fallback] openpyxl failed: {openpyxl_error}")
+                # fallback 尝试使用 pyexcel
+                try:
+                    book = pe.get_book(file_name=file_path)
+                    for sheet in book:
+                        rows = sheet.to_array()
+                        if not rows:
+                            content[sheet.name] = []
+                            continue
+
+                        headers = rows[0]
+                        print(f"✅ 读取表头（xls）: {headers}")
+
+                        sheet_content = [
+                            {str(i): h for i, h in enumerate(headers)}
+                        ] + [
+                            {str(i): str(cell) if cell is not None else '' for i, cell in enumerate(row)}
+                            for row in rows[1:]
+                        ]
+                        content[sheet.name] = sheet_content
+
+                    return {
+                        'content': content,
+                        'file_type': 'Excel'
+                    }
+
+                except Exception as pe_error:
+                    print(f"[Error] Both openpyxl and pyexcel failed.")
+                    raise pe_error  # 抛出最终错误
 
         except Exception as e:
             print(f"Error processing Excel file: {str(e)}")
             raise
-
 
    ################2025.5.12更改def——updatefilecontent################
     def update_file_content(self, file, content):

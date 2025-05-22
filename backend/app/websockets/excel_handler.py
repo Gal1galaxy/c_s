@@ -59,7 +59,6 @@ def handle_join(data):
             'fromUserId': user_id
         }, to=request.sid)
 
-
 @socketio.on('leave_edit')
 def handle_leave(data):
     file_id = str(data.get('fileId'))
@@ -85,7 +84,6 @@ def handle_leave(data):
         file_editors.pop(file_id, None)
         file_data.pop(file_id, None)
         cell_locks.pop(file_id, None)
-
 
 @socketio.on('lock_cell')
 def handle_lock_cell(data):
@@ -188,10 +186,8 @@ def handle_cell_updated(data):
         if not has_permission:
             print(f"No write permission for user {user_id}")  # 添加权限拒绝日志
             emit('error', {'message': '没有编辑权限'})
-            return
-            
-        print(f"Cell update authorized for user {user_id}")  # 添加授权日志
-        
+            return            
+        print(f"Cell update authorized for user {user_id}")  # 添加授权日志        
         # 获取房间中的用户数量
         room = f'file_{file_id}'
         room_size = len(socketio.server.manager.rooms.get(f'/{room}', {}))
@@ -260,8 +256,6 @@ def handle_sync_data(data):
         'fromUserId': from_user_id
     }, room=room, include_self=False)
 
-
-
 @socketio.on('save_request')
 def handle_save_request(data):
     """处理保存请求"""
@@ -319,8 +313,6 @@ def cleanup_expired_locks():
                     },
                     'userId': lock_info['user_id']
                 }, room=f'file_{file_id}')
-
-
 
 # 设置定期清理任务
 from apscheduler.schedulers.background import BackgroundScheduler

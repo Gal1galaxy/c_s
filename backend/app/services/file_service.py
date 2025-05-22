@@ -433,7 +433,7 @@ class FileService:
         except Exception as e:
             print(f"Error processing image file: {str(e)}")
             raise
-################2025.5.12更改def——handle_excel_file################
+
     def _handle_excel_file(self, file_path):
         """处理 Excel 文件（支持 .xlsx 和 .xls，无伪表头判断）"""
         try:
@@ -504,7 +504,7 @@ class FileService:
             raise
 
 
-   ################2025.5.12更改def——updatefilecontent################
+
     def update_file_content(self, file, content):
         """更新文件内容"""
         temp_path = None
